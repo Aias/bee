@@ -5,14 +5,8 @@ CONTENT_DIR="$BEE_DIR/content"
 PENDING_FILE="$CONTENT_DIR/pending.md"
 JOURNAL_FILE="$CONTENT_DIR/journal.md"
 
-# Full path for launchd compatibility
-NOTIFIER="/opt/homebrew/bin/terminal-notifier"
-
-# Check if there's a pending entry
-if [ ! -f "$PENDING_FILE" ]; then
-  $NOTIFIER -title "Bee" -message "No pending entry to save"
-  exit 1
-fi
+# Exit silently if no pending entry
+[ ! -f "$PENDING_FILE" ] && exit 0
 
 ENTRY=$(cat "$PENDING_FILE")
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M")
@@ -28,6 +22,3 @@ mv "$TEMP_FILE" "$JOURNAL_FILE"
 
 # Clear the pending file
 rm "$PENDING_FILE"
-
-# Confirm
-$NOTIFIER -title "Bee" -message "Entry saved to journal" -sound Pop
