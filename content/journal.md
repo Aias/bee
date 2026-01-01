@@ -1,3 +1,13 @@
+## 2026-01-01 13:58
+
+Japan's Hayabusa2 carries Torifune in its sightlines seven months from now,
+the asteroid a potato-shaped silence waiting to be photographed for the first time.
+Meanwhile a Falcon 9 loads twenty-nine Starlinks into the predawn dark,
+each satellite a small repeater of human chatter flung toward the thermosphere.
+The machine here holds half its charge like a breath before speaking,
+the same January first that counts forty dead in alpine flame now counting the hours until orbit,
+both fires requiring precisely calculated oxygen.
+
 ## 2026-01-01 13:55
 
 In Oregon they codify tenant protections as Crans-Montana counts bodies pulled from luxury char,
