@@ -7,9 +7,62 @@ struct BeeRunResult {
     let duration: TimeInterval
 }
 
-/// Marker the bee outputs when it wants confirmation
-/// Format: <!-- BEE:CONFIRM -->message here
-private let confirmMarker = "<!-- BEE:CONFIRM -->"
+/// Structured output from bee execution
+struct BeeOutput: Codable {
+    enum Status: String, Codable {
+        case needsConfirmation = "needs_confirmation"
+        case completed = "completed"
+        case error = "error"
+    }
+
+    let status: Status
+    let confirmMessage: String?
+    let result: String?
+    let error: String?
+}
+
+/// Wrapper for Claude CLI JSON output format
+struct CLIOutputWrapper: Codable {
+    let type: String
+    let result: String?
+    let structuredOutput: BeeOutput?
+    let isError: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case result
+        case structuredOutput = "structured_output"
+        case isError = "is_error"
+    }
+}
+
+/// JSON schema for structured bee output
+private let beeOutputSchema = """
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["needs_confirmation", "completed", "error"],
+      "description": "Current status: needs_confirmation if awaiting user approval, completed if task finished, error if something went wrong"
+    },
+    "confirmMessage": {
+      "type": "string",
+      "description": "Message to show user when requesting confirmation (required when status is needs_confirmation)"
+    },
+    "result": {
+      "type": "string",
+      "description": "Summary of what was accomplished (required when status is completed)"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error description (required when status is error)"
+    }
+  },
+  "required": ["status"],
+  "additionalProperties": false
+}
+"""
 
 enum BeeRunner {
     static func run(_ bee: Bee, cli: String, model: String?, completion: @escaping (BeeRunResult) -> Void) {
@@ -129,18 +182,32 @@ enum BeeRunner {
         let enhancedSkill = skill + """
 
 
-## Confirmation Protocol
+## Output Format
 
-If you need user confirmation before completing a critical action, output exactly:
-<!-- BEE:CONFIRM -->Your message explaining what you want to do
+Your response will be parsed as JSON. You MUST return a valid JSON object with this structure:
 
-Then STOP and wait. Do not proceed with the action until confirmed.
-The user will see a notification with your message and can Confirm or Reject.
-If confirmed, you will receive a follow-up message to proceed.
+- If you need user confirmation before a critical action:
+  {"status": "needs_confirmation", "confirmMessage": "Explain what you want to do and why"}
+
+- If you completed the task successfully:
+  {"status": "completed", "result": "Summary of what was accomplished"}
+
+- If an error occurred:
+  {"status": "error", "error": "Description of what went wrong"}
+
+IMPORTANT: Only request confirmation for actions that modify files, send data, or have side effects.
+Do not request confirmation for read-only operations.
 """
 
         arguments.append("--system-prompt")
         arguments.append(enhancedSkill)
+
+        // Use structured output for reliable parsing
+        arguments.append("--output-format")
+        arguments.append("json")
+        arguments.append("--json-schema")
+        arguments.append(beeOutputSchema)
+
         arguments.append("--")
 
         // Build the user prompt
@@ -155,14 +222,19 @@ If confirmed, you will receive a follow-up message to proceed.
         let cliPath = try await findCLI(cli)
         let result = try await runProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
 
-        // Check if output contains confirmation request
-        if let confirmRange = result.output.range(of: confirmMarker) {
-            let message = String(result.output[confirmRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            let confirmMessage = message.components(separatedBy: "\n").first ?? message
+        // Parse CLI JSON wrapper, then extract structured_output
+        guard let jsonData = result.output.data(using: .utf8),
+              let cliOutput = try? JSONDecoder().decode(CLIOutputWrapper.self, from: jsonData),
+              let beeOutput = cliOutput.structuredOutput else {
+            // Failed to parse - return raw output as error
+            return (result.output, "Failed to parse structured output", false)
+        }
 
+        switch beeOutput.status {
+        case .needsConfirmation:
+            let confirmMessage = beeOutput.confirmMessage ?? "Confirmation requested"
             print("🐝 \(bee.displayName) requesting confirmation: \(confirmMessage)")
 
-            // Request confirmation from user
             let confirmed = await ConfirmServer.requestConfirmation(
                 beeId: bee.id,
                 beeName: bee.displayName,
@@ -185,9 +257,15 @@ If confirmed, you will receive a follow-up message to proceed.
             } else {
                 return (result.output, "User rejected confirmation", false)
             }
-        }
 
-        return (result.output, result.error, result.exitCode == 0)
+        case .completed:
+            let output = beeOutput.result ?? "Task completed"
+            return (output, nil, true)
+
+        case .error:
+            let errorMsg = beeOutput.error ?? "Unknown error"
+            return (result.output, errorMsg, false)
+        }
     }
 
     /// Resume an existing session after user confirmation
@@ -223,6 +301,12 @@ If confirmed, you will receive a follow-up message to proceed.
         arguments.append("--system-prompt")
         arguments.append(skill)
 
+        // Use structured output for reliable parsing
+        arguments.append("--output-format")
+        arguments.append("json")
+        arguments.append("--json-schema")
+        arguments.append(beeOutputSchema)
+
         // Use -- to separate options from the prompt
         arguments.append("--")
         arguments.append("The user has CONFIRMED. Proceed with the action now.")
@@ -230,10 +314,30 @@ If confirmed, you will receive a follow-up message to proceed.
         let cliPath = try await findCLI(cli)
         let result = try await runProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
 
-        // Combine outputs for logging
-        let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+        // Parse CLI JSON wrapper, then extract structured_output
+        guard let jsonData = result.output.data(using: .utf8),
+              let cliOutput = try? JSONDecoder().decode(CLIOutputWrapper.self, from: jsonData),
+              let beeOutput = cliOutput.structuredOutput else {
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+            return (combinedOutput, "Failed to parse structured output", false)
+        }
 
-        return (combinedOutput, result.error, result.exitCode == 0)
+        switch beeOutput.status {
+        case .completed:
+            let output = beeOutput.result ?? "Task completed"
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + output
+            return (combinedOutput, nil, true)
+
+        case .error:
+            let errorMsg = beeOutput.error ?? "Unknown error"
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+            return (combinedOutput, errorMsg, false)
+
+        case .needsConfirmation:
+            // Shouldn't happen after confirmation, but handle gracefully
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+            return (combinedOutput, "Unexpected confirmation request after user confirmed", false)
+        }
     }
 
     private static func findCLI(_ cli: String) async throws -> String {

@@ -111,17 +111,14 @@ Scripts run in alphabetical order. Make them executable: `chmod +x scripts/*.sh`
 
 ## User Confirmation Protocol
 
-Bees can request user confirmation before completing critical actions. Add the confirmation marker to your skill output:
+Bees can request user confirmation before completing critical actions using structured JSON output.
 
-```markdown
-<!-- BEE:CONFIRM -->Your message explaining what you want to do
-```
+**How it works:**
 
-When Claude outputs this marker:
-1. The bee pauses execution
-2. A notification appears with Confirm/Reject buttons
-3. On **Confirm**: The session resumes and Claude continues
-4. On **Reject** or timeout: The bee run ends
+Bees return JSON with a `status` field:
+- `needs_confirmation` — Pauses and shows a notification with Confirm/Reject
+- `completed` — Task finished successfully
+- `error` — Something went wrong
 
 **Example skill with confirmation:**
 
@@ -134,12 +131,13 @@ allowed-tools: WebSearch Write Read
 ## Process
 
 1. Search for current events and compose a journal entry
-2. Output your entry and request confirmation:
-   <!-- BEE:CONFIRM -->Ready to add journal entry about [topic]
-3. After confirmation, prepend the entry to ~/journal.md
+2. Request confirmation:
+   {"status": "needs_confirmation", "confirmMessage": "Ready to add journal entry about [topic]"}
+3. After confirmation, write the entry and return:
+   {"status": "completed", "result": "Added journal entry about [topic]"}
 ```
 
-The confirmation protocol is automatically appended to all skills. Timeout defaults to 5 minutes (configurable via `timeout` in hive.yaml).
+The output schema is automatically enforced via `--json-schema`. Timeout defaults to 5 minutes (configurable via `timeout` in hive.yaml).
 
 ## Logs
 
