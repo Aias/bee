@@ -1,0 +1,33 @@
+name: Bee
+options:
+  bundleIdPrefix: com.bee
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+targets:
+  Bee:
+    type: application
+    platform: macOS
+    sources:
+      - Bee
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bee.app
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_KEY_LSUIElement: true  # Menu bar app - no dock icon
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2025"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: false
+    entitlements:
+      path: Bee/Bee.entitlements
+      properties:
+        com.apple.security.app-sandbox: false  # Disable sandbox for file access

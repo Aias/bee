@@ -1,6 +1,18 @@
 # Bee
 
-Ambient journaling system powered by Claude. Every 5 minutes, Claude gathers context from the machine and composes a reflective thought. A notification appears with a preview—click to save, dismiss to discard.
+macOS menu bar app for managing scheduled AI agents ("bees") that follow the Agent Skills specification.
+
+## Development Principles
+
+**Native macOS first**: Prioritize idiomatic SwiftUI and standard Apple patterns over custom solutions. Accept platform inconsistencies rather than fighting them—if Apple's components render slightly differently, that's fine. Only deviate when absolutely necessary. The app should feel like a native macOS citizen.
+
+**Agent Skills compliance**: Each bee is a valid Agent Skills folder (SKILL.md + optional scripts/). Don't extend or modify the spec unless required.
+
+---
+
+## Legacy Architecture (v1)
+
+> Note: The shell-based approach below is being replaced by the SwiftUI app. Keeping for reference during migration.
 
 ## Architecture
 
