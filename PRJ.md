@@ -160,8 +160,38 @@ Append entry to ~/Code/bee/content/journal.md after user approval via notificati
 
 - **On completion**: Native macOS notification with summary
 - **On error**: Immediate notification with error details
-- **Pending action**: Notification → if ignored, badge menu bar icon
-- **Escalation**: Clicking badge opens dropdown to pending item
+
+### User Interaction Protocol (AskUser)
+
+Bees can request user input during execution via the `AskUser` tool, exposed through a local MCP server.
+
+**Tool Interface:**
+```
+AskUser(message: string, options?: string[]) → { response: string, action: 'accept' | 'reject' }
+```
+
+**Flow:**
+1. Bee calls `AskUser` → Notification appears
+2. User clicks notification → Reply window opens
+3. User selects option or types response → Accept
+4. User clicks reject or dismisses → Reject (task ends)
+5. Response piped back to bee via stdin
+
+**Behavior:**
+- Tool always available to all bees (automatically injected via MCP)
+- Multiple pending requests stack as separate notifications
+- Dismiss = reject
+- Default timeout: 5 minutes → auto-reject
+- Per-bee timeout configurable in hive.yaml
+
+**Reply Window:**
+- Shows bee's message and predefined options
+- Free text field for custom response
+- Accept / Reject buttons
+- Closes immediately after response
+
+**Process Model:**
+Bees run in conversational mode (not `--print`) to support back-and-forth. App monitors stdout for MCP tool calls, pipes responses via stdin.
 
 ---
 
