@@ -175,6 +175,7 @@ If confirmed, you will receive a follow-up message to proceed.
                 return try await resumeSession(
                     bee: bee,
                     cli: cli,
+                    model: model,
                     sessionId: sessionId,
                     skill: enhancedSkill,
                     allowedTools: allowedTools,
@@ -193,6 +194,7 @@ If confirmed, you will receive a follow-up message to proceed.
     private static func resumeSession(
         bee: Bee,
         cli: String,
+        model: String?,
         sessionId: String,
         skill: String,
         allowedTools: [String],
@@ -204,6 +206,12 @@ If confirmed, you will receive a follow-up message to proceed.
             "-r", sessionId,
             "-p"
         ]
+
+        // Model must be passed on resume to maintain consistency
+        if let model {
+            arguments.append("--model")
+            arguments.append(model)
+        }
 
         // Must include allowedTools on resume too
         if !allowedTools.isEmpty {
