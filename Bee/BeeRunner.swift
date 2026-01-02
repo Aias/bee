@@ -8,7 +8,7 @@ struct BeeRunResult {
 }
 
 enum BeeRunner {
-    static func run(_ bee: Bee, cli: String, completion: @escaping (BeeRunResult) -> Void) {
+    static func run(_ bee: Bee, cli: String, model: String?, completion: @escaping (BeeRunResult) -> Void) {
         let startTime = Date()
 
         Task {
@@ -22,6 +22,7 @@ enum BeeRunner {
                 // 3. Build CLI command
                 let result = try await executeCLI(
                     cli: cli,
+                    model: model,
                     skill: skillContent,
                     context: context,
                     allowedTools: bee.allowedTools,
@@ -95,12 +96,19 @@ enum BeeRunner {
 
     private static func executeCLI(
         cli: String,
+        model: String?,
         skill: String,
         context: String,
         allowedTools: [String],
         workingDirectory: URL
     ) async throws -> (output: String, error: String?, exitCode: Int32) {
         var arguments: [String] = ["--print"]
+
+        // Add model if specified
+        if let model {
+            arguments.append("--model")
+            arguments.append(model)
+        }
 
         // Add allowed tools if specified
         if !allowedTools.isEmpty {

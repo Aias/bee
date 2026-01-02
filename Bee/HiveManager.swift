@@ -18,12 +18,14 @@ struct BeeConfig: Equatable {
     var enabled: Bool = true
     var schedule: String = "*/5 * * * *"  // Default: every 5 minutes
     var cli: String?  // nil = use global default
+    var model: String?  // nil = use global default (e.g., "sonnet", "haiku", "opus")
     var overlap: String?  // nil = use global default
 }
 
 struct HiveConfig {
     var version: Int = 1
     var defaultCLI: String = "claude"
+    var defaultModel: String? = nil  // nil = CLI default (e.g., "sonnet", "haiku", "opus")
     var defaultOverlap: String = "skip"
     var bees: [String: BeeConfig] = [:]
 }
@@ -244,6 +246,8 @@ final class HiveManager {
                 } else if !inBees {
                     if trimmed.hasPrefix("cli:") {
                         config.defaultCLI = parseValue(trimmed)
+                    } else if trimmed.hasPrefix("model:") {
+                        config.defaultModel = parseValue(trimmed)
                     } else if trimmed.hasPrefix("overlap:") {
                         config.defaultOverlap = parseValue(trimmed)
                     }
@@ -256,6 +260,8 @@ final class HiveManager {
                     beeConfig.schedule = parseValue(trimmed).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
                 } else if trimmed.hasPrefix("cli:") {
                     beeConfig.cli = parseValue(trimmed)
+                } else if trimmed.hasPrefix("model:") {
+                    beeConfig.model = parseValue(trimmed)
                 } else if trimmed.hasPrefix("overlap:") {
                     beeConfig.overlap = parseValue(trimmed)
                 }
@@ -277,6 +283,9 @@ final class HiveManager {
         lines.append("")
         lines.append("defaults:")
         lines.append("  cli: \(config.defaultCLI)")
+        if let model = config.defaultModel {
+            lines.append("  model: \(model)")
+        }
         lines.append("  overlap: \(config.defaultOverlap)")
         lines.append("")
         lines.append("bees:")
@@ -287,6 +296,9 @@ final class HiveManager {
             lines.append("    schedule: \"\(beeConfig.schedule)\"")
             if let cli = beeConfig.cli {
                 lines.append("    cli: \(cli)")
+            }
+            if let model = beeConfig.model {
+                lines.append("    model: \(model)")
             }
             if let overlap = beeConfig.overlap {
                 lines.append("    overlap: \(overlap)")

@@ -120,11 +120,12 @@ struct MenuBarView: View {
             Button {
                 isPaused.toggle()
             } label: {
-                Label(
-                    isPaused ? "Resume All" : "Pause All",
-                    systemImage: isPaused ? "play.fill" : "pause.fill"
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 8) {
+                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                        .frame(width: 16)
+                    Text(isPaused ? "Resume All" : "Pause All")
+                    Spacer()
+                }
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
@@ -132,12 +133,13 @@ struct MenuBarView: View {
 
             Divider()
 
-            Button {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                NSApp.activate(ignoringOtherApps: true)
-            } label: {
-                Label("Preferences...", systemImage: "gear")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            SettingsLink {
+                HStack(spacing: 8) {
+                    Image(systemName: "gear")
+                        .frame(width: 16)
+                    Text("Preferences...")
+                    Spacer()
+                }
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
@@ -149,8 +151,12 @@ struct MenuBarView: View {
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
-                Label("Quit Bee", systemImage: "xmark.circle")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 8) {
+                    Image(systemName: "xmark.circle")
+                        .frame(width: 16)
+                    Text("Quit Bee")
+                    Spacer()
+                }
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
@@ -209,7 +215,44 @@ struct BeeDetailView: View {
                 HStack {
                     Text("Schedule:")
                         .foregroundStyle(.secondary)
-                    Text(bee.config.enabled ? CronParser.toEnglish(bee.config.schedule) : "Disabled")
+                    if bee.config.enabled {
+                        let schedule = CronParser.toEnglish(bee.config.schedule)
+                        if let nextRun = CronParser.nextRun(bee.config.schedule) {
+                            Text("\(schedule), next \(CronParser.formatNextRun(nextRun))")
+                        } else {
+                            Text(schedule)
+                        }
+                    } else {
+                        Text("Disabled")
+                    }
+                }
+                .font(.caption)
+                HStack {
+                    Text("Model:")
+                        .foregroundStyle(.secondary)
+                    Menu {
+                        Button("Default") {
+                            hive.updateBeeConfig(bee.id) { $0.model = nil }
+                        }
+                        Divider()
+                        Button("Opus") {
+                            hive.updateBeeConfig(bee.id) { $0.model = "opus" }
+                        }
+                        Button("Sonnet") {
+                            hive.updateBeeConfig(bee.id) { $0.model = "sonnet" }
+                        }
+                        Button("Haiku") {
+                            hive.updateBeeConfig(bee.id) { $0.model = "haiku" }
+                        }
+                    } label: {
+                        Text(bee.config.model?.capitalized ?? "Default")
+                            .foregroundStyle(.primary)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .menuStyle(.borderlessButton)
+                    .fixedSize()
                 }
                 .font(.caption)
             }
@@ -223,8 +266,12 @@ struct BeeDetailView: View {
                 Button {
                     scheduler.triggerManually(bee)
                 } label: {
-                    Label("Run Now", systemImage: "play.fill")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: "play.fill")
+                            .frame(width: 16)
+                        Text("Run Now")
+                        Spacer()
+                    }
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal)
@@ -236,11 +283,12 @@ struct BeeDetailView: View {
                         config.enabled.toggle()
                     }
                 } label: {
-                    Label(
-                        bee.config.enabled ? "Disable" : "Enable",
-                        systemImage: bee.config.enabled ? "pause.circle" : "play.circle"
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: bee.config.enabled ? "pause.circle" : "play.circle")
+                            .frame(width: 16)
+                        Text(bee.config.enabled ? "Disable" : "Enable")
+                        Spacer()
+                    }
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal)
@@ -254,8 +302,12 @@ struct BeeDetailView: View {
                         .appendingPathComponent(bee.id)
                     NSWorkspace.shared.open(logsPath)
                 } label: {
-                    Label("Open Logs Folder", systemImage: "folder")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: "folder")
+                            .frame(width: 16)
+                        Text("Open Logs Folder")
+                        Spacer()
+                    }
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal)
@@ -264,8 +316,12 @@ struct BeeDetailView: View {
                 Button {
                     NSWorkspace.shared.open(bee.path)
                 } label: {
-                    Label("Open Skill Folder", systemImage: "doc.text")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.text")
+                            .frame(width: 16)
+                        Text("Open Skill Folder")
+                        Spacer()
+                    }
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal)
@@ -430,7 +486,12 @@ struct BeeRow: View {
         if !bee.config.enabled {
             return "Disabled"
         }
-        return CronParser.toEnglish(bee.config.schedule)
+        let schedule = CronParser.toEnglish(bee.config.schedule)
+        if let nextRun = CronParser.nextRun(bee.config.schedule) {
+            let nextTime = CronParser.formatNextRun(nextRun)
+            return "\(schedule), next \(nextTime)"
+        }
+        return schedule
     }
 
     var body: some View {

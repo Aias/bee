@@ -12,10 +12,11 @@ final class AppState {
         scheduler.start(hive: hive, isPaused: { [weak self] in self?.isPaused ?? true }) { [weak self] bee in
             guard let self else { return }
             let cli = bee.config.cli ?? self.hive.config.defaultCLI
+            let model = bee.config.model ?? self.hive.config.defaultModel
 
-            print("🐝 Triggered: \(bee.displayName) (using \(cli))")
+            print("🐝 Triggered: \(bee.displayName) (using \(cli)\(model.map { ", model: \($0)" } ?? ""))")
 
-            BeeRunner.run(bee, cli: cli) { result in
+            BeeRunner.run(bee, cli: cli, model: model) { result in
                 if result.success {
                     print("✅ \(bee.displayName) completed in \(String(format: "%.1f", result.duration))s")
                 } else {

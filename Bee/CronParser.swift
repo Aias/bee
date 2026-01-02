@@ -1,6 +1,83 @@
 import Foundation
 
 enum CronParser {
+    /// Calculates the next run time for a cron expression
+    static func nextRun(_ cron: String, after date: Date = Date()) -> Date? {
+        let parts = cron.split(separator: " ").map(String.init)
+        guard parts.count == 5 else { return nil }
+
+        let calendar = Calendar.current
+        var candidate = calendar.date(byAdding: .minute, value: 1, to: date)!
+        // Round down to the start of the minute
+        candidate = calendar.date(bySetting: .second, value: 0, of: candidate)!
+
+        // Search up to 1 year ahead
+        let maxIterations = 525600 // minutes in a year
+        for _ in 0..<maxIterations {
+            let minute = calendar.component(.minute, from: candidate)
+            let hour = calendar.component(.hour, from: candidate)
+            let day = calendar.component(.day, from: candidate)
+            let month = calendar.component(.month, from: candidate)
+            let weekday = calendar.component(.weekday, from: candidate) - 1 // 0 = Sunday
+
+            if fieldMatches(parts[0], value: minute, max: 59) &&
+               fieldMatches(parts[1], value: hour, max: 23) &&
+               fieldMatches(parts[2], value: day, max: 31) &&
+               fieldMatches(parts[3], value: month, max: 12) &&
+               fieldMatches(parts[4], value: weekday, max: 6) {
+                return candidate
+            }
+
+            candidate = calendar.date(byAdding: .minute, value: 1, to: candidate)!
+        }
+
+        return nil
+    }
+
+    /// Formats the next run time for display
+    static func formatNextRun(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let formatter = DateFormatter()
+
+        if calendar.isDateInToday(date) {
+            formatter.dateFormat = "h:mm a"
+            return formatter.string(from: date)
+        } else if calendar.isDateInTomorrow(date) {
+            formatter.dateFormat = "h:mm a"
+            return "tomorrow \(formatter.string(from: date))"
+        } else {
+            formatter.dateFormat = "MMM d, h:mm a"
+            return formatter.string(from: date)
+        }
+    }
+
+    private static func fieldMatches(_ field: String, value: Int, max: Int) -> Bool {
+        if field == "*" { return true }
+
+        if field.hasPrefix("*/") {
+            guard let step = Int(field.dropFirst(2)), step > 0 else { return false }
+            return value % step == 0
+        }
+
+        if field.contains("-") && !field.contains(",") {
+            let rangeParts = field.split(separator: "-").compactMap { Int($0) }
+            if rangeParts.count == 2 {
+                return value >= rangeParts[0] && value <= rangeParts[1]
+            }
+        }
+
+        if field.contains(",") {
+            let values = field.split(separator: ",").compactMap { Int($0) }
+            return values.contains(value)
+        }
+
+        if let exact = Int(field) {
+            return value == exact
+        }
+
+        return false
+    }
+
     /// Converts a cron expression to human-readable English
     static func toEnglish(_ cron: String) -> String {
         let parts = cron.split(separator: " ").map(String.init)
