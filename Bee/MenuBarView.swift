@@ -440,8 +440,8 @@ struct BeeDetailView: View {
 
     private func formatTimestamp(_ isoString: String) -> String {
         // Convert 2026-01-02T150248 to "Today 3:02 PM" or "Jan 2, 3:02 PM"
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate]
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HHmmss"
 
         guard let date = formatter.date(from: isoString) else {
             return isoString

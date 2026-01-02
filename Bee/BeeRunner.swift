@@ -447,8 +447,9 @@ Do not request confirmation for read-only operations.
 
         try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
 
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate]
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HHmmss"
+        formatter.timeZone = TimeZone.current
         let timestamp = formatter.string(from: Date())
 
         let logFile = logsDir.appendingPathComponent("\(timestamp).log")
