@@ -2,6 +2,8 @@
 
 macOS menu bar app for managing scheduled AI agents ("bees") that follow the Agent Skills specification.
 
+> **Note**: `CLAUDE.md` is symlinked to this file. Always edit `AGENTS.md`, not the symlink.
+
 ## Development Principles
 
 **Native macOS first**: Prioritize idiomatic SwiftUI and standard Apple patterns over custom solutions. The app should feel like a native macOS citizen.
@@ -22,14 +24,25 @@ Bee/
 └── NotificationManager.swift  # Error notifications via UserNotifications
 ```
 
+## After Code Changes
+
+Always rebuild and relaunch the app after making changes:
+
+```bash
+xcodebuild -scheme Bee -configuration Debug build && pkill -x Bee; open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
+```
+
 ## Quick Commands
 
 ```bash
 # Build
-xcodegen generate && xcodebuild -scheme Bee -configuration Debug build
+xcodebuild -scheme Bee -configuration Debug build
 
 # Run
 open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
+
+# Kill and relaunch
+pkill -x Bee; open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
 
 # Open in Xcode
 open Bee.xcodeproj
