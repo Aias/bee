@@ -4,63 +4,43 @@ macOS menu bar app for managing scheduled AI agents ("bees") that follow the Age
 
 ## Development Principles
 
-**Native macOS first**: Prioritize idiomatic SwiftUI and standard Apple patterns over custom solutions. Accept platform inconsistencies rather than fighting them—if Apple's components render slightly differently, that's fine. Only deviate when absolutely necessary. The app should feel like a native macOS citizen.
+**Native macOS first**: Prioritize idiomatic SwiftUI and standard Apple patterns over custom solutions. The app should feel like a native macOS citizen.
 
 **Agent Skills compliance**: Each bee is a valid Agent Skills folder (SKILL.md + optional scripts/). Don't extend or modify the spec unless required.
-
----
-
-## Legacy Architecture (v1)
-
-> Note: The shell-based approach below is being replaced by the SwiftUI app. Keeping for reference during migration.
 
 ## Architecture
 
 ```
-compose.sh    Gathers system context, runs Claude to compose entry, sends notification
-accept.sh     Notification click handler—appends pending entry to journal
-journal.md    The accumulated journal entries
-pending.md    Ephemeral draft awaiting user approval (auto-deleted on accept)
+Bee/
+├── BeeApp.swift           # App entry, MenuBarExtra + Settings scenes
+├── MenuBarView.swift      # Dropdown UI with bee list and drill-down details
+├── PreferencesView.swift  # Settings window (⌘,)
+├── HiveManager.swift      # Bee discovery from ~/.bee/, config load/save
+├── Scheduler.swift        # Cron evaluation, timer management, overlap handling
+├── BeeRunner.swift        # Claude CLI subprocess execution, logging
+├── CronParser.swift       # Cron → English conversion
+└── NotificationManager.swift  # Error notifications via UserNotifications
 ```
 
-## Context Sources
-
-Currently:
-- Date/time
-- Weather (via wttr.in)
-- System uptime, battery, memory
-- Optional web search
-
-Future ideas:
-- Recent shell history
-- Git activity
-- Calendar events
-- Music playing
-- Screen time / active app
-
-## Scheduling
-
-The launchd plist (`com.bee.compose.plist`) runs `compose.sh` every 5 minutes. Install with:
+## Quick Commands
 
 ```bash
-ln -sf ~/Code/bee/com.bee.compose.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.bee.compose.plist
+# Build
+xcodegen generate && xcodebuild -scheme Bee -configuration Debug build
+
+# Run
+open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
+
+# Open in Xcode
+open Bee.xcodeproj
 ```
 
-Unload with:
-```bash
-launchctl unload ~/Library/LaunchAgents/com.bee.compose.plist
-```
+## Key Files
 
-## Manual Testing
-
-```bash
-./compose.sh   # Run once manually
-```
-
-## Logs
-
-Check `logs/stdout.log` and `logs/stderr.log` for debugging.
+- `~/.bee/hive.yaml` — Global config (CLI, overlap policy, per-bee settings)
+- `~/.bee/{bee-id}/SKILL.md` — Bee skill definition (Agent Skills spec)
+- `~/.bee/{bee-id}/scripts/` — Optional context-gathering scripts
+- `~/.bee/logs/{bee-id}/` — Run logs with timestamps
 
 ---
 

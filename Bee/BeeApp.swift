@@ -36,7 +36,7 @@ struct BeeApp: App {
         MenuBarExtra {
             MenuBarView(hive: state.hive, scheduler: state.scheduler, isPaused: $state.isPaused)
         } label: {
-            Label("Bee", systemImage: state.isPaused ? "pause.circle" : "ant")
+            Label("Bee", systemImage: state.isPaused ? "pause.circle" : "ant.fill")
         }
         .menuBarExtraStyle(.window)
 
