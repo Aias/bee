@@ -23,11 +23,11 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bee.app
         GENERATE_INFOPLIST_FILE: true
-        INFOPLIST_KEY_LSUIElement: true  # Menu bar app - no dock icon
-        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2025"
+        INFOPLIST_KEY_LSUIElement: true # Menu bar app - no dock icon
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026"
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: false
     entitlements:
       path: Bee/Bee.entitlements
       properties:
-        com.apple.security.app-sandbox: false  # Disable sandbox for file access
+        com.apple.security.app-sandbox: false # Disable sandbox for file access

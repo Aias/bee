@@ -32,7 +32,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Image(systemName: "ant")
+                Image(systemName: "ant.fill")
                 Text("Bee")
                     .font(.headline)
                 Spacer()
