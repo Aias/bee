@@ -92,7 +92,7 @@ enum BeeRunner {
                 let duration = Date().timeIntervalSince(startTime)
 
                 // 4. Log output
-                await logRun(bee: bee, output: result.output, error: result.error, duration: duration)
+                await logRun(bee: bee, cli: cli, model: model, output: result.output, error: result.error, duration: duration)
 
                 await MainActor.run {
                     completion(BeeRunResult(
@@ -252,10 +252,10 @@ Do not request confirmation for read-only operations.
                     skill: enhancedSkill,
                     allowedTools: allowedTools,
                     workingDirectory: workingDirectory,
-                    previousOutput: result.output
+                    previousOutput: confirmMessage
                 )
             } else {
-                return (result.output, "User rejected confirmation", false)
+                return (confirmMessage, "User rejected confirmation", false)
             }
 
         case .completed:
@@ -330,13 +330,15 @@ Do not request confirmation for read-only operations.
 
         case .error:
             let errorMsg = beeOutput.error ?? "Unknown error"
-            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + errorMsg
             return (combinedOutput, errorMsg, false)
 
         case .needsConfirmation:
             // Shouldn't happen after confirmation, but handle gracefully
-            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
-            return (combinedOutput, "Unexpected confirmation request after user confirmed", false)
+            let confirmMessage = beeOutput.confirmMessage ?? "Confirmation requested"
+            let errorMsg = "Unexpected confirmation request after user confirmed: \(confirmMessage)"
+            let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + errorMsg
+            return (combinedOutput, errorMsg, false)
         }
     }
 
@@ -385,24 +387,60 @@ Do not request confirmation for read-only operations.
             process.standardOutput = outputPipe
             process.standardError = errorPipe
 
+            // Read output asynchronously to avoid deadlock when output exceeds pipe buffer
+            var outputData = Data()
+            var errorData = Data()
+            let outputLock = NSLock()
+            let errorLock = NSLock()
+
+            outputPipe.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if !data.isEmpty {
+                    outputLock.lock()
+                    outputData.append(data)
+                    outputLock.unlock()
+                }
+            }
+
+            errorPipe.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if !data.isEmpty {
+                    errorLock.lock()
+                    errorData.append(data)
+                    errorLock.unlock()
+                }
+            }
+
             do {
                 try process.run()
                 process.waitUntilExit()
 
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+                // Clean up handlers
+                outputPipe.fileHandleForReading.readabilityHandler = nil
+                errorPipe.fileHandleForReading.readabilityHandler = nil
+
+                // Read any remaining data
+                outputLock.lock()
+                outputData.append(outputPipe.fileHandleForReading.readDataToEndOfFile())
+                outputLock.unlock()
+
+                errorLock.lock()
+                errorData.append(errorPipe.fileHandleForReading.readDataToEndOfFile())
+                errorLock.unlock()
 
                 let output = String(data: outputData, encoding: .utf8) ?? ""
                 let error = String(data: errorData, encoding: .utf8)
 
                 continuation.resume(returning: (output, error, process.terminationStatus))
             } catch {
+                outputPipe.fileHandleForReading.readabilityHandler = nil
+                errorPipe.fileHandleForReading.readabilityHandler = nil
                 continuation.resume(throwing: error)
             }
         }
     }
 
-    private static func logRun(bee: Bee, output: String, error: String?, duration: TimeInterval) async {
+    private static func logRun(bee: Bee, cli: String, model: String?, output: String, error: String?, duration: TimeInterval) async {
         let logsDir = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".bee/logs")
             .appendingPathComponent(bee.id)
@@ -410,7 +448,7 @@ Do not request confirmation for read-only operations.
         try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
 
         let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate, .withColonSeparatorInTime]
+        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate]
         let timestamp = formatter.string(from: Date())
 
         let logFile = logsDir.appendingPathComponent("\(timestamp).log")
@@ -419,6 +457,8 @@ Do not request confirmation for read-only operations.
         # Bee Run: \(bee.displayName)
         # Timestamp: \(timestamp)
         # Duration: \(String(format: "%.2f", duration))s
+        # CLI: \(cli)
+        # Model: \(model ?? "default")
 
         ## Output
 

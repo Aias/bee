@@ -1,21 +1,36 @@
 import SwiftUI
 
 struct PreferencesView: View {
-    @AppStorage("defaultCLI") private var defaultCLI = "claude"
-    @AppStorage("defaultOverlap") private var defaultOverlap = "skip"
-    @AppStorage("hivePath") private var hivePath = "~/.bee"
+    var hive: HiveManager
 
     var body: some View {
         Form {
             Section {
-                Picker("Default CLI", selection: $defaultCLI) {
+                Picker("Default CLI", selection: Binding(
+                    get: { hive.config.defaultCLI },
+                    set: { newValue in hive.updateGlobalConfig { $0.defaultCLI = newValue } }
+                )) {
                     Text("Claude").tag("claude")
                     Text("Codex").tag("codex")
                     Text("Cursor").tag("cursor")
                 }
                 .pickerStyle(.menu)
 
-                Picker("Overlap Behavior", selection: $defaultOverlap) {
+                Picker("Default Model", selection: Binding(
+                    get: { hive.config.defaultModel ?? "" },
+                    set: { newValue in hive.updateGlobalConfig { $0.defaultModel = newValue.isEmpty ? nil : newValue } }
+                )) {
+                    Text("CLI Default").tag("")
+                    Text("Opus").tag("opus")
+                    Text("Sonnet").tag("sonnet")
+                    Text("Haiku").tag("haiku")
+                }
+                .pickerStyle(.menu)
+
+                Picker("Overlap Behavior", selection: Binding(
+                    get: { hive.config.defaultOverlap },
+                    set: { newValue in hive.updateGlobalConfig { $0.defaultOverlap = newValue } }
+                )) {
                     Text("Skip").tag("skip")
                     Text("Queue").tag("queue")
                     Text("Parallel").tag("parallel")
@@ -27,12 +42,13 @@ struct PreferencesView: View {
 
             Section {
                 HStack {
-                    TextField("Hive Path", text: $hivePath)
-                        .textFieldStyle(.roundedBorder)
+                    Text(hive.hivePath.path)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
 
                     Button("Reveal") {
-                        let expanded = NSString(string: hivePath).expandingTildeInPath
-                        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: expanded)
+                        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: hive.hivePath.path)
                     }
                 }
             } header: {

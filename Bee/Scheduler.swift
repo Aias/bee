@@ -59,7 +59,7 @@ final class Scheduler {
         for bee in hive.bees {
             guard bee.config.enabled else { continue }
 
-            if cronMatches(bee.config.schedule, date: now) {
+            if CronParser.matches(bee.config.schedule, date: now) {
                 handleTrigger(bee)
             }
         }
@@ -86,55 +86,4 @@ final class Scheduler {
         }
     }
 
-    // MARK: - Cron Matching
-
-    private func cronMatches(_ cron: String, date: Date) -> Bool {
-        let parts = cron.split(separator: " ").map(String.init)
-        guard parts.count == 5 else { return false }
-
-        let calendar = Calendar.current
-        let minute = calendar.component(.minute, from: date)
-        let hour = calendar.component(.hour, from: date)
-        let dayOfMonth = calendar.component(.day, from: date)
-        let month = calendar.component(.month, from: date)
-        let dayOfWeek = calendar.component(.weekday, from: date) - 1  // 0 = Sunday
-
-        return fieldMatches(parts[0], value: minute, max: 59) &&
-               fieldMatches(parts[1], value: hour, max: 23) &&
-               fieldMatches(parts[2], value: dayOfMonth, max: 31) &&
-               fieldMatches(parts[3], value: month, max: 12) &&
-               fieldMatches(parts[4], value: dayOfWeek, max: 6)
-    }
-
-    private func fieldMatches(_ field: String, value: Int, max: Int) -> Bool {
-        // Wildcard
-        if field == "*" { return true }
-
-        // Step values (*/n)
-        if field.hasPrefix("*/") {
-            guard let step = Int(field.dropFirst(2)), step > 0 else { return false }
-            return value % step == 0
-        }
-
-        // Range (n-m)
-        if field.contains("-") && !field.contains(",") {
-            let rangeParts = field.split(separator: "-").compactMap { Int($0) }
-            if rangeParts.count == 2 {
-                return value >= rangeParts[0] && value <= rangeParts[1]
-            }
-        }
-
-        // List (n,m,o)
-        if field.contains(",") {
-            let values = field.split(separator: ",").compactMap { Int($0) }
-            return values.contains(value)
-        }
-
-        // Exact value
-        if let exact = Int(field) {
-            return value == exact
-        }
-
-        return false
-    }
 }

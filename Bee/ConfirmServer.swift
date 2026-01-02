@@ -22,7 +22,7 @@ enum ConfirmServer {
         let timestamp: Date
     }
 
-    private static var pendingRequests: [String: (request: ConfirmRequest, continuation: CheckedContinuation<Bool, Never>)] = [:]
+    private static var pendingRequests: [String: (request: ConfirmRequest, continuation: CheckedContinuation<Bool, Never>, timeoutWork: DispatchWorkItem)] = [:]
     private static let queue = DispatchQueue(label: "com.bee.confirm-server")
 
     /// Request confirmation from the user
@@ -45,8 +45,13 @@ enum ConfirmServer {
 
         // Show notification with actions
         return await withCheckedContinuation { continuation in
+            // Create cancellable timeout work item
+            let timeoutWork = DispatchWorkItem {
+                Self.handleResponse(requestId: requestId, confirmed: false, reason: "timeout")
+            }
+
             queue.sync {
-                pendingRequests[requestId] = (request, continuation)
+                pendingRequests[requestId] = (request, continuation, timeoutWork)
             }
 
             // Show actionable notification
@@ -57,10 +62,8 @@ enum ConfirmServer {
                 message: message
             )
 
-            // Set up timeout
-            DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-                Self.handleResponse(requestId: requestId, confirmed: false, reason: "timeout")
-            }
+            // Schedule timeout (can be cancelled if user responds first)
+            DispatchQueue.main.asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
         }
     }
 
@@ -70,6 +73,9 @@ enum ConfirmServer {
             guard let pending = pendingRequests.removeValue(forKey: requestId) else {
                 return
             }
+
+            // Cancel the timeout if it hasn't fired yet
+            pending.timeoutWork.cancel()
 
             if let reason {
                 print("🐝 Confirm \(pending.request.beeName): \(reason)")

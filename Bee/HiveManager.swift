@@ -105,6 +105,11 @@ final class HiveManager {
         saveConfig()
     }
 
+    func updateGlobalConfig(_ update: (inout HiveConfig) -> Void) {
+        update(&config)
+        saveConfig()
+    }
+
     private func syncConfigWithBees() {
         var needsSave = false
         for bee in bees {
@@ -169,11 +174,26 @@ final class HiveManager {
             }
         }
 
-        // Parse with support for one level of nesting (e.g., metadata.display-name)
+        // Parse with support for one level of nesting (e.g., metadata.display-name) and YAML lists
         var currentParent: String?
+        var listItems: [String] = []
+
         for line in frontmatterLines {
             let indent = line.prefix(while: { $0 == " " }).count
             let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+            // Handle YAML list items (- item)
+            if indent == 2, let parent = currentParent, trimmed.hasPrefix("- ") {
+                let item = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                listItems.append(item)
+                continue
+            }
+
+            // Flush any accumulated list items when we leave the list
+            if !listItems.isEmpty, let parent = currentParent {
+                result[parent] = listItems.joined(separator: " ")
+                listItems = []
+            }
 
             let parts = trimmed.split(separator: ":", maxSplits: 1)
             guard parts.count >= 1 else { continue }
@@ -186,16 +206,21 @@ final class HiveManager {
                     result[key] = value
                     currentParent = nil
                 } else {
-                    // Parent key with no value (e.g., "metadata:")
+                    // Parent key with no value (e.g., "metadata:" or "allowed-tools:")
                     currentParent = key
                 }
             } else if indent == 2, let parent = currentParent {
-                // Nested key
+                // Nested key-value pair
                 if parts.count == 2 {
                     let value = String(parts[1]).trimmingCharacters(in: .whitespaces)
                     result["\(parent).\(key)"] = value
                 }
             }
+        }
+
+        // Flush any remaining list items at end of frontmatter
+        if !listItems.isEmpty, let parent = currentParent {
+            result[parent] = listItems.joined(separator: " ")
         }
 
         return result

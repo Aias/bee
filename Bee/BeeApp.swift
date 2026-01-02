@@ -42,7 +42,7 @@ struct BeeApp: App {
         .menuBarExtraStyle(.window)
 
         Settings {
-            PreferencesView()
+            PreferencesView(hive: state.hive)
         }
     }
 }

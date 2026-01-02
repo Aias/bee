@@ -51,6 +51,25 @@ enum CronParser {
         }
     }
 
+    /// Check if a cron expression matches a given date
+    static func matches(_ cron: String, date: Date) -> Bool {
+        let parts = cron.split(separator: " ").map(String.init)
+        guard parts.count == 5 else { return false }
+
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: date)
+        let hour = calendar.component(.hour, from: date)
+        let dayOfMonth = calendar.component(.day, from: date)
+        let month = calendar.component(.month, from: date)
+        let dayOfWeek = calendar.component(.weekday, from: date) - 1  // 0 = Sunday
+
+        return fieldMatches(parts[0], value: minute, max: 59) &&
+               fieldMatches(parts[1], value: hour, max: 23) &&
+               fieldMatches(parts[2], value: dayOfMonth, max: 31) &&
+               fieldMatches(parts[3], value: month, max: 12) &&
+               fieldMatches(parts[4], value: dayOfWeek, max: 6)
+    }
+
     private static func fieldMatches(_ field: String, value: Int, max: Int) -> Bool {
         if field == "*" { return true }
 

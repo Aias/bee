@@ -263,20 +263,32 @@ struct BeeDetailView: View {
 
             // Actions
             VStack(spacing: 0) {
-                Button {
-                    scheduler.triggerManually(bee)
-                } label: {
+                if isRunning {
                     HStack(spacing: 8) {
-                        Image(systemName: "play.fill")
+                        ProgressView()
+                            .controlSize(.small)
                             .frame(width: 16)
-                        Text("Run Now")
+                        Text("Running...")
+                            .foregroundStyle(.secondary)
                         Spacer()
                     }
+                    .padding(.horizontal)
+                    .padding(.vertical, 6)
+                } else {
+                    Button {
+                        scheduler.triggerManually(bee)
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "play.fill")
+                                .frame(width: 16)
+                            Text("Run Now")
+                            Spacer()
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
+                    .padding(.vertical, 6)
                 }
-                .buttonStyle(.plain)
-                .padding(.horizontal)
-                .padding(.vertical, 6)
-                .disabled(isRunning)
 
                 Button {
                     hive.updateBeeConfig(bee.id) { config in
@@ -427,9 +439,9 @@ struct BeeDetailView: View {
     }
 
     private func formatTimestamp(_ isoString: String) -> String {
-        // Convert 2026-01-02T15:02:48 to "Today 3:02 PM" or "Jan 2, 3:02 PM"
+        // Convert 2026-01-02T150248 to "Today 3:02 PM" or "Jan 2, 3:02 PM"
         let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate, .withColonSeparatorInTime]
+        formatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate]
 
         guard let date = formatter.date(from: isoString) else {
             return isoString
