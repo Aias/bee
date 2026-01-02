@@ -7,6 +7,10 @@ struct BeeRunResult {
     let duration: TimeInterval
 }
 
+/// Marker the bee outputs when it wants confirmation
+/// Format: <!-- BEE:CONFIRM -->message here
+private let confirmMarker = "<!-- BEE:CONFIRM -->"
+
 enum BeeRunner {
     static func run(_ bee: Bee, cli: String, model: String?, completion: @escaping (BeeRunResult) -> Void) {
         let startTime = Date()
@@ -19,8 +23,9 @@ enum BeeRunner {
                 // 2. Read SKILL.md
                 let skillContent = try String(contentsOf: bee.skillPath, encoding: .utf8)
 
-                // 3. Build CLI command
+                // 3. Build and run CLI command
                 let result = try await executeCLI(
+                    bee: bee,
                     cli: cli,
                     model: model,
                     skill: skillContent,
@@ -36,7 +41,7 @@ enum BeeRunner {
 
                 await MainActor.run {
                     completion(BeeRunResult(
-                        success: result.exitCode == 0,
+                        success: result.success,
                         output: result.output,
                         error: result.error,
                         duration: duration
@@ -75,14 +80,13 @@ enum BeeRunner {
         var contextParts: [String] = []
 
         for script in scripts.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-            // Check if executable
             guard let resourceValues = try? script.resourceValues(forKeys: [.isExecutableKey]),
                   resourceValues.isExecutable == true else {
                 continue
             }
 
             do {
-                let result = try await runProcess(script.path, arguments: [], workingDirectory: bee.path)
+                let result = try await runSimpleProcess(script.path, arguments: [], workingDirectory: bee.path)
                 if !result.output.isEmpty {
                     contextParts.append("# Context from \(script.lastPathComponent)\n\(result.output)")
                 }
@@ -95,13 +99,14 @@ enum BeeRunner {
     }
 
     private static func executeCLI(
+        bee: Bee,
         cli: String,
         model: String?,
         skill: String,
         context: String,
         allowedTools: [String],
         workingDirectory: URL
-    ) async throws -> (output: String, error: String?, exitCode: Int32) {
+    ) async throws -> (output: String, error: String?, success: Bool) {
         var arguments: [String] = ["--print"]
 
         // Add model if specified
@@ -117,8 +122,21 @@ enum BeeRunner {
         }
 
         // Use system prompt for skill instructions
+        // Include info about the Confirm protocol
+        let enhancedSkill = skill + """
+
+
+        ## Confirmation Protocol
+
+        If you need user confirmation before completing a critical action, output exactly:
+        <!-- BEE:CONFIRM -->Your message explaining what you want to do
+
+        Then STOP and wait. Do not proceed with the action until confirmed.
+        The user will see a notification with your message and can Confirm or Reject.
+        """
+
         arguments.append("--system-prompt")
-        arguments.append(skill)
+        arguments.append(enhancedSkill)
 
         // End of options marker
         arguments.append("--")
@@ -133,11 +151,95 @@ enum BeeRunner {
         arguments.append(prompt)
 
         let cliPath = try await findCLI(cli)
-        return try await runProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
+        let result = try await runSimpleProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
+
+        // Check if output contains confirmation request
+        if let confirmRange = result.output.range(of: confirmMarker) {
+            let message = String(result.output[confirmRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Extract just the first line/paragraph as the confirmation message
+            let confirmMessage = message.components(separatedBy: "\n").first ?? message
+
+            print("🐝 \(bee.displayName) requesting confirmation: \(confirmMessage)")
+
+            // Request confirmation from user
+            let confirmed = await ConfirmServer.requestConfirmation(
+                beeId: bee.id,
+                beeName: bee.displayName,
+                message: confirmMessage,
+                timeout: Double(bee.config.timeout ?? 300)
+            )
+
+            if confirmed {
+                // Re-run with confirmation
+                print("🐝 \(bee.displayName) confirmed, continuing...")
+                return try await executeCLIWithConfirmation(
+                    bee: bee,
+                    cli: cli,
+                    model: model,
+                    skill: skill,
+                    context: context,
+                    allowedTools: allowedTools,
+                    workingDirectory: workingDirectory,
+                    previousOutput: result.output
+                )
+            } else {
+                // User rejected
+                return (result.output, "User rejected confirmation", false)
+            }
+        }
+
+        return (result.output, result.error, result.exitCode == 0)
+    }
+
+    /// Re-run the CLI with confirmation context
+    private static func executeCLIWithConfirmation(
+        bee: Bee,
+        cli: String,
+        model: String?,
+        skill: String,
+        context: String,
+        allowedTools: [String],
+        workingDirectory: URL,
+        previousOutput: String
+    ) async throws -> (output: String, error: String?, success: Bool) {
+        var arguments: [String] = ["--print"]
+
+        if let model {
+            arguments.append("--model")
+            arguments.append(model)
+        }
+
+        if !allowedTools.isEmpty {
+            arguments.append("--allowedTools")
+            arguments.append(allowedTools.joined(separator: ","))
+        }
+
+        arguments.append("--system-prompt")
+        arguments.append(skill)
+        arguments.append("--")
+
+        // Continue with confirmation
+        let prompt = """
+        The user has CONFIRMED your previous request. You may now proceed with the action.
+
+        Your previous output:
+        \(previousOutput)
+
+        Continue and complete the task now.
+        """
+        arguments.append(prompt)
+
+        let cliPath = try await findCLI(cli)
+        let result = try await runSimpleProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
+
+        // Combine outputs
+        let combinedOutput = previousOutput + "\n\n--- After Confirmation ---\n\n" + result.output
+
+        return (combinedOutput, result.error, result.exitCode == 0)
     }
 
     private static func findCLI(_ cli: String) async throws -> String {
-        // Check common locations
         let searchPaths = [
             "/usr/local/bin/\(cli)",
             "/opt/homebrew/bin/\(cli)",
@@ -151,8 +253,7 @@ enum BeeRunner {
             }
         }
 
-        // Try using `which`
-        let result = try await runProcess("/usr/bin/which", arguments: [cli], workingDirectory: nil)
+        let result = try await runSimpleProcess("/usr/bin/which", arguments: [cli], workingDirectory: nil)
         let path = result.output.trimmingCharacters(in: .whitespacesAndNewlines)
         if !path.isEmpty && FileManager.default.fileExists(atPath: path) {
             return path
@@ -163,7 +264,7 @@ enum BeeRunner {
         ])
     }
 
-    private static func runProcess(
+    private static func runSimpleProcess(
         _ path: String,
         arguments: [String],
         workingDirectory: URL?

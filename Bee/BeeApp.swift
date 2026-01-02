@@ -7,7 +7,7 @@ final class AppState {
     var isPaused = false
 
     init() {
-        NotificationManager.requestPermission()
+        NotificationManager.shared.setup()
 
         scheduler.start(hive: hive, isPaused: { [weak self] in self?.isPaused ?? true }) { [weak self] bee in
             guard let self else { return }

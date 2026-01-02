@@ -20,6 +20,7 @@ struct BeeConfig: Equatable {
     var cli: String?  // nil = use global default
     var model: String?  // nil = use global default (e.g., "sonnet", "haiku", "opus")
     var overlap: String?  // nil = use global default
+    var timeout: Int?  // Confirmation timeout in seconds, nil = use default (300)
 }
 
 struct HiveConfig {
