@@ -1,11 +1,15 @@
 import Foundation
 
+// MARK: - BeeRunResult
+
 struct BeeRunResult {
     let success: Bool
     let output: String
     let error: String?
     let duration: TimeInterval
 }
+
+// MARK: - BeeOutput
 
 /// Structured output from bee execution
 struct BeeOutput: Codable {
@@ -20,6 +24,8 @@ struct BeeOutput: Codable {
     let result: String?
     let error: String?
 }
+
+// MARK: - CLIOutputWrapper
 
 /// Wrapper for Claude CLI JSON output format
 struct CLIOutputWrapper: Codable {
@@ -44,7 +50,7 @@ private let beeOutputSchema = """
     "status": {
       "type": "string",
       "enum": ["needs_confirmation", "completed", "error"],
-      "description": "Current status: needs_confirmation if awaiting user approval, completed if task finished, error if something went wrong"
+      "description": "needs_confirmation if awaiting approval, completed if done, error if failed"
     },
     "confirmMessage": {
       "type": "string",
@@ -63,6 +69,8 @@ private let beeOutputSchema = """
   "additionalProperties": false
 }
 """
+
+// MARK: - BeeRunner
 
 enum BeeRunner {
     static func run(_ bee: Bee, cli: String, model: String?, completion: @escaping (BeeRunResult) -> Void) {
@@ -211,11 +219,10 @@ Do not request confirmation for read-only operations.
         arguments.append("--")
 
         // Build the user prompt
-        let prompt: String
-        if context.isEmpty {
-            prompt = "Run your scheduled task now."
+        let prompt = if context.isEmpty {
+            "Run your scheduled task now."
         } else {
-            prompt = "Run your scheduled task with this context:\n\n\(context)"
+            "Run your scheduled task with this context:\n\n\(context)"
         }
         arguments.append(prompt)
 
@@ -351,15 +358,13 @@ Do not request confirmation for read-only operations.
             "/usr/bin/\(cli)"
         ]
 
-        for path in searchPaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return path
-            }
+        if let path = searchPaths.first(where: { FileManager.default.fileExists(atPath: $0) }) {
+            return path
         }
 
         let result = try await runProcess("/usr/bin/which", arguments: [cli], workingDirectory: nil)
         let path = result.output.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !path.isEmpty && FileManager.default.fileExists(atPath: path) {
+        if !path.isEmpty, FileManager.default.fileExists(atPath: path) {
             return path
         }
 

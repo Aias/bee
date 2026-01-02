@@ -1,0 +1,37 @@
+# SwiftFormat configuration for Bee
+
+# File options
+--exclude .build,DerivedData,Packages
+
+# Format options (match existing code style)
+--indent 4
+--indentstrings false
+--indentcase false
+--trimwhitespace always
+--voidtype void
+--semicolons never
+--commas inline
+--stripunusedargs closure-only
+--maxwidth 140
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--funcattributes prev-line
+--typeattributes prev-line
+--varattributes same-line
+--self remove
+--importgrouping alpha
+--extensionacl on-declarations
+
+# Disable rules that are too aggressive for this project
+--disable blankLinesAtEndOfScope
+--disable blankLinesAtStartOfScope
+--disable redundantRawValues
+--disable markTypes
+--disable wrapMultilineStatementBraces
+
+# Enable useful rules
+--enable isEmpty
+--enable markTypes
+--enable sortImports

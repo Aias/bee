@@ -22,7 +22,11 @@ enum ConfirmServer {
         let timestamp: Date
     }
 
-    private static var pendingRequests: [String: (request: ConfirmRequest, continuation: CheckedContinuation<Bool, Never>, timeoutWork: DispatchWorkItem)] = [:]
+    private static var pendingRequests: [String: (
+        request: ConfirmRequest,
+        continuation: CheckedContinuation<Bool, Never>,
+        timeoutWork: DispatchWorkItem
+    )] = [:]
     private static let queue = DispatchQueue(label: "com.bee.confirm-server")
 
     /// Request confirmation from the user

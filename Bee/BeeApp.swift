@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - AppState
+
 @Observable
 final class AppState {
     let hive = HiveManager()
@@ -11,8 +13,8 @@ final class AppState {
 
         scheduler.start(hive: hive, isPaused: { [weak self] in self?.isPaused ?? true }) { [weak self] bee in
             guard let self else { return }
-            let cli = bee.config.cli ?? self.hive.config.defaultCLI
-            let model = bee.config.model ?? self.hive.config.defaultModel
+            let cli = bee.config.cli ?? hive.config.defaultCLI
+            let model = bee.config.model ?? hive.config.defaultModel
 
             print("🐝 Triggered: \(bee.displayName) (using \(cli)\(model.map { ", model: \($0)" } ?? ""))")
 
@@ -28,6 +30,8 @@ final class AppState {
         }
     }
 }
+
+// MARK: - BeeApp
 
 @main
 struct BeeApp: App {

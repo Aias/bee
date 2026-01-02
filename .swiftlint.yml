@@ -1,0 +1,60 @@
+# SwiftLint configuration for Bee
+
+excluded:
+  - .build
+  - DerivedData
+  - Packages
+
+# Disable rules that conflict with project style or are too noisy
+disabled_rules:
+  - trailing_comma
+  - opening_brace
+  - identifier_name  # Allow short names like `id`, `url`
+  - type_body_length
+  - file_length
+  - function_body_length
+  - large_tuple  # Used for internal return types
+  - function_parameter_count  # Internal APIs, not public
+  - multiple_closures_with_trailing_closure
+  - force_unwrapping  # Too noisy for known-safe contexts
+
+# Opt-in rules worth enabling
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - contains_over_first_not_nil
+  - discouraged_optional_boolean
+  - empty_string
+  - fallthrough
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - last_where
+  - legacy_random
+  - modifier_order
+  - overridden_super_call
+  - private_action
+  - private_outlet
+  - redundant_nil_coalescing
+  - toggle_bool
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - yoda_condition
+
+# Customize thresholds
+line_length:
+  warning: 140
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+nesting:
+  type_level: 3
+  function_level: 5
+
+# Reporter
+reporter: xcode

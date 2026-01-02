@@ -26,7 +26,13 @@ Bee/
 
 ## After Code Changes
 
-Always rebuild and relaunch the app after making changes:
+Run formatting and linting frequently during development:
+
+```bash
+swiftformat Bee && swiftlint --fix Bee
+```
+
+Then rebuild and relaunch the app:
 
 ```bash
 xcodebuild -scheme Bee -configuration Debug build && pkill -x Bee; open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app

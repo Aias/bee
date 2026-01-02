@@ -77,7 +77,7 @@ final class Scheduler {
             case "parallel":
                 // Allow parallel execution
                 onTrigger?(bee)
-            default:  // "skip"
+            default: // "skip"
                 return
             }
         } else {

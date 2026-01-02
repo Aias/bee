@@ -6,12 +6,14 @@ private let confirmCategoryId = "BEE_CONFIRM"
 private let confirmActionId = "CONFIRM_ACTION"
 private let rejectActionId = "REJECT_ACTION"
 
+// MARK: - NotificationManager
+
 /// Handles macOS notifications including actionable confirmation requests
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     static let shared = NotificationManager()
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -20,7 +22,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         center.delegate = self
 
         // Request permission
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { _, error in
             if let error {
                 print("Notification permission error: \(error.localizedDescription)")
             }

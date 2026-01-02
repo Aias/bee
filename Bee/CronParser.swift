@@ -12,18 +12,18 @@ enum CronParser {
         candidate = calendar.date(bySetting: .second, value: 0, of: candidate)!
 
         // Search up to 1 year ahead
-        let maxIterations = 525600 // minutes in a year
-        for _ in 0..<maxIterations {
+        let maxIterations = 525_600 // minutes in a year
+        for _ in 0 ..< maxIterations {
             let minute = calendar.component(.minute, from: candidate)
             let hour = calendar.component(.hour, from: candidate)
             let day = calendar.component(.day, from: candidate)
             let month = calendar.component(.month, from: candidate)
             let weekday = calendar.component(.weekday, from: candidate) - 1 // 0 = Sunday
 
-            if fieldMatches(parts[0], value: minute, max: 59) &&
-               fieldMatches(parts[1], value: hour, max: 23) &&
-               fieldMatches(parts[2], value: day, max: 31) &&
-               fieldMatches(parts[3], value: month, max: 12) &&
+            if fieldMatches(parts[0], value: minute, max: 59),
+               fieldMatches(parts[1], value: hour, max: 23),
+               fieldMatches(parts[2], value: day, max: 31),
+               fieldMatches(parts[3], value: month, max: 12),
                fieldMatches(parts[4], value: weekday, max: 6) {
                 return candidate
             }
@@ -61,13 +61,13 @@ enum CronParser {
         let hour = calendar.component(.hour, from: date)
         let dayOfMonth = calendar.component(.day, from: date)
         let month = calendar.component(.month, from: date)
-        let dayOfWeek = calendar.component(.weekday, from: date) - 1  // 0 = Sunday
+        let dayOfWeek = calendar.component(.weekday, from: date) - 1 // 0 = Sunday
 
         return fieldMatches(parts[0], value: minute, max: 59) &&
-               fieldMatches(parts[1], value: hour, max: 23) &&
-               fieldMatches(parts[2], value: dayOfMonth, max: 31) &&
-               fieldMatches(parts[3], value: month, max: 12) &&
-               fieldMatches(parts[4], value: dayOfWeek, max: 6)
+            fieldMatches(parts[1], value: hour, max: 23) &&
+            fieldMatches(parts[2], value: dayOfMonth, max: 31) &&
+            fieldMatches(parts[3], value: month, max: 12) &&
+            fieldMatches(parts[4], value: dayOfWeek, max: 6)
     }
 
     private static func fieldMatches(_ field: String, value: Int, max: Int) -> Bool {
@@ -78,7 +78,7 @@ enum CronParser {
             return value % step == 0
         }
 
-        if field.contains("-") && !field.contains(",") {
+        if field.contains("-"), !field.contains(",") {
             let rangeParts = field.split(separator: "-").compactMap { Int($0) }
             if rangeParts.count == 2 {
                 return value >= rangeParts[0] && value <= rangeParts[1]
@@ -118,7 +118,7 @@ enum CronParser {
         }
 
         // Every hour at specific minute
-        if !minute.contains("*") && !minute.contains("/"),
+        if !minute.contains("*"), !minute.contains("/"),
            hour == "*", dayOfMonth == "*", month == "*", dayOfWeek == "*" {
             let min = Int(minute) ?? 0
             if min == 0 {
@@ -128,21 +128,21 @@ enum CronParser {
         }
 
         // Daily at specific time
-        if !minute.contains("*") && !minute.contains("/"),
-           !hour.contains("*") && !hour.contains("/"),
+        if !minute.contains("*"), !minute.contains("/"),
+           !hour.contains("*"), !hour.contains("/"),
            dayOfMonth == "*", month == "*", dayOfWeek == "*" {
             return "Daily at \(formatTime(hour: hour, minute: minute))"
         }
 
         // Specific days of week
-        if dayOfWeek != "*" && dayOfMonth == "*" && month == "*" {
+        if dayOfWeek != "*", dayOfMonth == "*", month == "*" {
             let days = parseDaysOfWeek(dayOfWeek)
             let time = formatTime(hour: hour, minute: minute)
             return "\(days) at \(time)"
         }
 
         // Every N hours
-        if minute == "0" && hour.hasPrefix("*/"),
+        if minute == "0", hour.hasPrefix("*/"),
            dayOfMonth == "*", month == "*", dayOfWeek == "*" {
             let interval = String(hour.dropFirst(2))
             if interval == "1" {

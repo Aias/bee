@@ -1,10 +1,12 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Bee
+
 struct Bee: Identifiable {
-    let id: String  // folder name (matches SKILL.md name field per spec)
-    let displayName: String  // from metadata.display-name, falls back to id
-    let icon: String  // SF Symbol name from metadata.icon, falls back to "ant"
+    let id: String // folder name (matches SKILL.md name field per spec)
+    let displayName: String // from metadata.display-name, falls back to id
+    let icon: String // SF Symbol name from metadata.icon, falls back to "ant"
     let description: String
     let path: URL
     let allowedTools: [String]
@@ -14,33 +16,40 @@ struct Bee: Identifiable {
     var scriptsPath: URL { path.appendingPathComponent("scripts") }
 }
 
+// MARK: - BeeConfig
+
 struct BeeConfig: Equatable {
     var enabled: Bool = true
-    var schedule: String = "*/5 * * * *"  // Default: every 5 minutes
-    var cli: String?  // nil = use global default
-    var model: String?  // nil = use global default (e.g., "sonnet", "haiku", "opus")
-    var overlap: String?  // nil = use global default
-    var timeout: Int?  // Confirmation timeout in seconds, nil = use default (300)
+    var schedule: String = "*/5 * * * *" // Default: every 5 minutes
+    var cli: String? // nil = use global default
+    var model: String? // nil = use global default (e.g., "sonnet", "haiku", "opus")
+    var overlap: String? // nil = use global default
+    var timeout: Int? // Confirmation timeout in seconds, nil = use default (300)
 }
+
+// MARK: - HiveConfig
 
 struct HiveConfig {
     var version: Int = 1
     var defaultCLI: String = "claude"
-    var defaultModel: String? = nil  // nil = CLI default (e.g., "sonnet", "haiku", "opus")
+    var defaultModel: String? // nil = CLI default (e.g., "sonnet", "haiku", "opus")
     var defaultOverlap: String = "skip"
     var bees: [String: BeeConfig] = [:]
 }
 
+// MARK: - HiveManager
+
 @Observable
 final class HiveManager {
     private(set) var bees: [Bee] = []
-    private(set) var config: HiveConfig = HiveConfig()
+    private(set) var config: HiveConfig = .init()
     private(set) var lastError: String?
 
     private let fileManager = FileManager.default
     var hivePath: URL {
         fileManager.homeDirectoryForCurrentUser.appendingPathComponent(".bee")
     }
+
     private var configPath: URL {
         hivePath.appendingPathComponent("hive.yaml")
     }
@@ -112,11 +121,9 @@ final class HiveManager {
 
     private func syncConfigWithBees() {
         var needsSave = false
-        for bee in bees {
-            if config.bees[bee.id] == nil {
-                config.bees[bee.id] = BeeConfig()
-                needsSave = true
-            }
+        for bee in bees where config.bees[bee.id] == nil {
+            config.bees[bee.id] = BeeConfig()
+            needsSave = true
         }
         if needsSave {
             saveConfig()
@@ -163,7 +170,7 @@ final class HiveManager {
         for line in lines {
             if line == "---" {
                 if inFrontmatter {
-                    break  // End of frontmatter
+                    break // End of frontmatter
                 } else {
                     inFrontmatter = true
                     continue
@@ -256,46 +263,70 @@ final class HiveManager {
 
             let indent = line.prefix(while: { $0 == " " }).count
 
-            if indent == 0 {
-                if trimmed.hasPrefix("version:") {
-                    config.version = Int(parseValue(trimmed)) ?? 1
-                } else if trimmed == "defaults:" {
-                    inBees = false
-                } else if trimmed == "bees:" {
-                    inBees = true
-                }
+            switch indent {
+            case 0:
                 currentBeeId = nil
-            } else if indent == 2 {
-                if inBees && trimmed.hasSuffix(":") {
-                    currentBeeId = String(trimmed.dropLast())
-                    config.bees[currentBeeId!] = BeeConfig()
-                } else if !inBees {
-                    if trimmed.hasPrefix("cli:") {
-                        config.defaultCLI = parseValue(trimmed)
-                    } else if trimmed.hasPrefix("model:") {
-                        config.defaultModel = parseValue(trimmed)
-                    } else if trimmed.hasPrefix("overlap:") {
-                        config.defaultOverlap = parseValue(trimmed)
-                    }
+                parseRootLevel(trimmed, config: &config, inBees: &inBees)
+            case 2:
+                parseIndent2(trimmed, config: &config, inBees: inBees, currentBeeId: &currentBeeId)
+            case 4:
+                if let beeId = currentBeeId {
+                    parseBeeConfig(trimmed, config: &config, beeId: beeId)
                 }
-            } else if indent == 4, let beeId = currentBeeId {
-                var beeConfig = config.bees[beeId] ?? BeeConfig()
-                if trimmed.hasPrefix("enabled:") {
-                    beeConfig.enabled = parseValue(trimmed) == "true"
-                } else if trimmed.hasPrefix("schedule:") {
-                    beeConfig.schedule = parseValue(trimmed).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-                } else if trimmed.hasPrefix("cli:") {
-                    beeConfig.cli = parseValue(trimmed)
-                } else if trimmed.hasPrefix("model:") {
-                    beeConfig.model = parseValue(trimmed)
-                } else if trimmed.hasPrefix("overlap:") {
-                    beeConfig.overlap = parseValue(trimmed)
-                }
-                config.bees[beeId] = beeConfig
+            default:
+                break
             }
         }
 
         return config
+    }
+
+    private func parseRootLevel(_ line: String, config: inout HiveConfig, inBees: inout Bool) {
+        if line.hasPrefix("version:") {
+            config.version = Int(parseValue(line)) ?? 1
+        } else if line == "defaults:" {
+            inBees = false
+        } else if line == "bees:" {
+            inBees = true
+        }
+    }
+
+    private func parseIndent2(_ line: String, config: inout HiveConfig, inBees: Bool, currentBeeId: inout String?) {
+        if inBees, line.hasSuffix(":") {
+            let beeId = String(line.dropLast())
+            currentBeeId = beeId
+            config.bees[beeId] = BeeConfig()
+        } else if !inBees {
+            parseDefaults(line, config: &config)
+        }
+    }
+
+    private func parseDefaults(_ line: String, config: inout HiveConfig) {
+        if line.hasPrefix("cli:") {
+            config.defaultCLI = parseValue(line)
+        } else if line.hasPrefix("model:") {
+            config.defaultModel = parseValue(line)
+        } else if line.hasPrefix("overlap:") {
+            config.defaultOverlap = parseValue(line)
+        }
+    }
+
+    private func parseBeeConfig(_ line: String, config: inout HiveConfig, beeId: String) {
+        var beeConfig = config.bees[beeId] ?? BeeConfig()
+
+        if line.hasPrefix("enabled:") {
+            beeConfig.enabled = parseValue(line) == "true"
+        } else if line.hasPrefix("schedule:") {
+            beeConfig.schedule = parseValue(line).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        } else if line.hasPrefix("cli:") {
+            beeConfig.cli = parseValue(line)
+        } else if line.hasPrefix("model:") {
+            beeConfig.model = parseValue(line)
+        } else if line.hasPrefix("overlap:") {
+            beeConfig.overlap = parseValue(line)
+        }
+
+        config.bees[beeId] = beeConfig
     }
 
     private func parseValue(_ line: String) -> String {

@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - MenuBarView
+
 struct MenuBarView: View {
     var hive: HiveManager
     var scheduler: Scheduler
@@ -166,7 +168,7 @@ struct MenuBarView: View {
     }
 }
 
-// MARK: - Bee Detail View
+// MARK: - BeeDetailView
 
 struct BeeDetailView: View {
     let bee: Bee
@@ -463,6 +465,8 @@ struct BeeDetailView: View {
     }
 }
 
+// MARK: - BeeRunLog
+
 struct BeeRunLog: Identifiable {
     let id: String
     let timestamp: String
@@ -480,7 +484,7 @@ struct BeeRunLog: Identifiable {
     }
 }
 
-// MARK: - Bee Row
+// MARK: - BeeRow
 
 struct BeeRow: View {
     let bee: Bee
