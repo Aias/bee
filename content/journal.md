@@ -1,3 +1,13 @@
+## 2026-01-01 14:03
+
+The Pope opens the calendar with a plea for peace,
+a word that sounds different in each of the languages it enters,
+while Afghanistan buries seventeen under the first rain of the season,
+the floods arriving before anyone could name them forecast.
+In Geneva the diplomatic quarters prepare their agendas,
+somewhere a translator rehearses the phrase *lasting ceasefire* for the hundredth time,
+and here the machine ticks through its afternoon charge like a clock that has nothing to count but itself.
+
 ## 2026-01-01 13:58
 
 Japan's Hayabusa2 carries Torifune in its sightlines seven months from now,
