@@ -4,6 +4,7 @@ import SwiftUI
 struct Bee: Identifiable {
     let id: String  // folder name (matches SKILL.md name field per spec)
     let displayName: String  // from metadata.display-name, falls back to id
+    let icon: String  // SF Symbol name from metadata.icon, falls back to "ant"
     let description: String
     let path: URL
     let allowedTools: [String]
@@ -127,10 +128,13 @@ final class HiveManager {
 
         // Display name: prefer metadata.display-name, fall back to folder name
         let displayName = frontmatter["metadata.display-name"] ?? folderName
+        // Icon: prefer metadata.icon, fall back to "ant"
+        let icon = frontmatter["metadata.icon"] ?? "ant"
 
         return Bee(
             id: folderName,
             displayName: displayName,
+            icon: icon,
             description: frontmatter["description"] ?? "",
             path: url,
             allowedTools: parseAllowedTools(frontmatter["allowed-tools"]),

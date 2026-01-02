@@ -11,12 +11,14 @@
 		25938C1B7593892246D0F0C2 /* HiveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9955572BF1488620BBC9E1 /* HiveManager.swift */; };
 		265233796B3E5F2ACFBF7199 /* BeeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1F517A85A10F32B7579853 /* BeeApp.swift */; };
 		2E6CA933000B9C73C375DC49 /* BeeRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C8EC38B9887A48C8830A9A1 /* BeeRunner.swift */; };
+		3E285B4282E409F81B08C816 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B1656C27F2992D391274ED /* NotificationManager.swift */; };
 		7CE09FC196E8DA50A7F3C60B /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC189921973D9EE8DD8EA06A /* Scheduler.swift */; };
 		96B71B74CD52E055672BEB5D /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91286474DD850C7AD6953513 /* MenuBarView.swift */; };
 		C70DB5E69048E2130C33C2EF /* CronParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669409F384B30B441B9D8CE0 /* CronParser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		32B1656C27F2992D391274ED /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		4D1F517A85A10F32B7579853 /* BeeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeeApp.swift; sourceTree = "<group>"; };
 		669409F384B30B441B9D8CE0 /* CronParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronParser.swift; sourceTree = "<group>"; };
 		6C9955572BF1488620BBC9E1 /* HiveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiveManager.swift; sourceTree = "<group>"; };
@@ -38,6 +40,7 @@
 				669409F384B30B441B9D8CE0 /* CronParser.swift */,
 				6C9955572BF1488620BBC9E1 /* HiveManager.swift */,
 				91286474DD850C7AD6953513 /* MenuBarView.swift */,
+				32B1656C27F2992D391274ED /* NotificationManager.swift */,
 				8E6B2F07D688BF18283F6AA1 /* PreferencesView.swift */,
 				FC189921973D9EE8DD8EA06A /* Scheduler.swift */,
 			);
@@ -123,6 +126,7 @@
 				C70DB5E69048E2130C33C2EF /* CronParser.swift in Sources */,
 				25938C1B7593892246D0F0C2 /* HiveManager.swift in Sources */,
 				96B71B74CD52E055672BEB5D /* MenuBarView.swift in Sources */,
+				3E285B4282E409F81B08C816 /* NotificationManager.swift in Sources */,
 				0658366F3E38C33129969796 /* PreferencesView.swift in Sources */,
 				7CE09FC196E8DA50A7F3C60B /* Scheduler.swift in Sources */,
 			);

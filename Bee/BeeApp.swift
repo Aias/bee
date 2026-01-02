@@ -7,6 +7,8 @@ final class AppState {
     var isPaused = false
 
     init() {
+        NotificationManager.requestPermission()
+
         scheduler.start(hive: hive, isPaused: { [weak self] in self?.isPaused ?? true }) { [weak self] bee in
             guard let self else { return }
             let cli = bee.config.cli ?? self.hive.config.defaultCLI
@@ -18,7 +20,7 @@ final class AppState {
                     print("✅ \(bee.displayName) completed in \(String(format: "%.1f", result.duration))s")
                 } else {
                     print("❌ \(bee.displayName) failed: \(result.error ?? "unknown error")")
-                    // TODO: Show error notification
+                    NotificationManager.showError(bee: bee, error: result.error ?? "Unknown error")
                 }
                 self.scheduler.markComplete(bee.id)
             }
