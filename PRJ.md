@@ -161,21 +161,28 @@ Append entry to ~/Code/bee/content/journal.md after user approval via notificati
 - **On completion**: Native macOS notification with summary
 - **On error**: Immediate notification with error details
 
-### User Interaction Protocol (AskUser)
+### User Confirmation Protocol (Confirm)
 
-Bees can request user input during execution via the `AskUser` tool, exposed through a local MCP server.
+Bees can request user confirmation during execution via the `Confirm` tool, exposed through a local MCP server.
 
 **Tool Interface:**
 ```
-AskUser(message: string, options?: string[]) → { response: string, action: 'accept' | 'reject' }
+Confirm(message: string) → { confirmed: boolean }
 ```
 
 **Flow:**
-1. Bee calls `AskUser` → Notification appears
-2. User clicks notification → Reply window opens
-3. User selects option or types response → Accept
-4. User clicks reject or dismisses → Reject (task ends)
-5. Response piped back to bee via stdin
+1. Bee calls `Confirm` → Notification appears with action buttons
+2. User clicks **Confirm** → `{confirmed: true}` sent to bee via stdin
+3. User clicks **Reject** or dismisses → Process killed
+
+**Notification:**
+```
+┌─────────────────────────────────────┐
+│ Journal Bee                         │
+│ Ready to write entry to journal.md  │
+│          [Reject]  [Confirm]        │
+└─────────────────────────────────────┘
+```
 
 **Behavior:**
 - Tool always available to all bees (automatically injected via MCP)
@@ -184,14 +191,11 @@ AskUser(message: string, options?: string[]) → { response: string, action: 'ac
 - Default timeout: 5 minutes → auto-reject
 - Per-bee timeout configurable in hive.yaml
 
-**Reply Window:**
-- Shows bee's message and predefined options
-- Free text field for custom response
-- Accept / Reject buttons
-- Closes immediately after response
-
 **Process Model:**
-Bees run in conversational mode (not `--print`) to support back-and-forth. App monitors stdout for MCP tool calls, pipes responses via stdin.
+Bees run in conversational mode (not `--print`) to support confirm/continue flow. App monitors stdout for MCP tool calls, pipes responses via stdin.
+
+**Future Enhancement:**
+Full `AskUser` tool with choices, free text input, and reply window UI.
 
 ---
 
