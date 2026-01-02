@@ -109,6 +109,38 @@ curl -s "wttr.in/?format=3"
 
 Scripts run in alphabetical order. Make them executable: `chmod +x scripts/*.sh`
 
+## User Confirmation Protocol
+
+Bees can request user confirmation before completing critical actions. Add the confirmation marker to your skill output:
+
+```markdown
+<!-- BEE:CONFIRM -->Your message explaining what you want to do
+```
+
+When Claude outputs this marker:
+1. The bee pauses execution
+2. A notification appears with Confirm/Reject buttons
+3. On **Confirm**: The session resumes and Claude continues
+4. On **Reject** or timeout: The bee run ends
+
+**Example skill with confirmation:**
+
+```markdown
+---
+name: journal-bee
+allowed-tools: WebSearch Write Read
+---
+
+## Process
+
+1. Search for current events and compose a journal entry
+2. Output your entry and request confirmation:
+   <!-- BEE:CONFIRM -->Ready to add journal entry about [topic]
+3. After confirmation, prepend the entry to ~/journal.md
+```
+
+The confirmation protocol is automatically appended to all skills. Timeout defaults to 5 minutes (configurable via `timeout` in hive.yaml).
+
 ## Logs
 
 Run logs are stored in `~/.bee/logs/{bee-id}/{timestamp}.log` with output and any errors.

@@ -153,17 +153,6 @@ If confirmed, you will receive a follow-up message to proceed.
         arguments.append(prompt)
 
         let cliPath = try await findCLI(cli)
-
-        // Debug: write to file so we can see exact command
-        let debugInfo = """
-        CLI Path: \(cliPath)
-        Arguments:
-        \(arguments.enumerated().map { "  [\($0.offset)] \($0.element)" }.joined(separator: "\n"))
-        """
-        let debugFile = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".bee/debug.log")
-        try? debugInfo.write(to: debugFile, atomically: true, encoding: .utf8)
-
         let result = try await runProcess(cliPath, arguments: arguments, workingDirectory: workingDirectory)
 
         // Check if output contains confirmation request
@@ -187,6 +176,7 @@ If confirmed, you will receive a follow-up message to proceed.
                     bee: bee,
                     cli: cli,
                     sessionId: sessionId,
+                    skill: enhancedSkill,
                     allowedTools: allowedTools,
                     workingDirectory: workingDirectory,
                     previousOutput: result.output
@@ -204,6 +194,7 @@ If confirmed, you will receive a follow-up message to proceed.
         bee: Bee,
         cli: String,
         sessionId: String,
+        skill: String,
         allowedTools: [String],
         workingDirectory: URL,
         previousOutput: String
@@ -219,6 +210,10 @@ If confirmed, you will receive a follow-up message to proceed.
             arguments.append("--allowedTools")
             arguments.append(allowedTools.joined(separator: ","))
         }
+
+        // System prompt is NOT preserved on resume - must pass it again
+        arguments.append("--system-prompt")
+        arguments.append(skill)
 
         // Use -- to separate options from the prompt
         arguments.append("--")
