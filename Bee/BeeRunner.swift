@@ -190,22 +190,22 @@ enum BeeRunner {
         let enhancedSkill = skill + """
 
 
-## Output Format
+        ## Output Format
 
-Your response will be parsed as JSON. You MUST return a valid JSON object with this structure:
+        Your response will be parsed as JSON. You MUST return a valid JSON object with this structure:
 
-- If you need user confirmation before a critical action:
-  {"status": "needs_confirmation", "confirmMessage": "Explain what you want to do and why"}
+        - If you need user confirmation before a critical action:
+          {"status": "needs_confirmation", "confirmMessage": "Explain what you want to do and why"}
 
-- If you completed the task successfully:
-  {"status": "completed", "result": "Summary of what was accomplished"}
+        - If you completed the task successfully:
+          {"status": "completed", "result": "Summary of what was accomplished"}
 
-- If an error occurred:
-  {"status": "error", "error": "Description of what went wrong"}
+        - If an error occurred:
+          {"status": "error", "error": "Description of what went wrong"}
 
-IMPORTANT: Only request confirmation for actions that modify files, send data, or have side effects.
-Do not request confirmation for read-only operations.
-"""
+        IMPORTANT: Only request confirmation for actions that modify files, send data, or have side effects.
+        Do not request confirmation for read-only operations.
+        """
 
         arguments.append("--system-prompt")
         arguments.append(enhancedSkill)

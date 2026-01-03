@@ -9,6 +9,10 @@ A macOS menu bar app for running scheduled AI agents. Each "bee" is a self-conta
 - [xcodegen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
 - [Claude CLI](https://claude.ai/code) installed and authenticated
 
+**Development tools** (optional but recommended):
+- [SwiftLint](https://github.com/realm/SwiftLint) (`brew install swiftlint`)
+- [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) (`brew install swiftformat`)
+
 ## Building
 
 ```bash
@@ -168,7 +172,13 @@ Run logs are stored in `~/.bee/logs/{bee-id}/{timestamp}.log` with output and an
 xcodegen generate
 
 # Build debug
-xcodebuild -project Bee.xcodeproj -scheme Bee -configuration Debug build
+xcodebuild -scheme Bee -configuration Debug build
+
+# Run tests
+xcodebuild test -scheme Bee -destination 'platform=macOS' -only-testing:BeeTests
+
+# Format and lint
+swiftformat . && swiftlint lint
 
 # Run from DerivedData
 open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
@@ -188,5 +198,12 @@ Bee/
 ├── Scheduler.swift        # Cron evaluation and timer management
 ├── BeeRunner.swift        # CLI subprocess execution
 ├── CronParser.swift       # Cron expression parsing and English conversion
+├── ConfirmServer.swift    # User confirmation flow via notifications
 └── NotificationManager.swift  # macOS notifications for errors
+
+BeeTests/                  # Unit tests (41 tests)
+├── CronParserTests.swift
+├── SchedulerTests.swift
+├── HiveManagerTests.swift
+└── TestHelpers.swift
 ```

@@ -545,3 +545,88 @@ struct BeeRow: View {
         .contentShape(Rectangle())
     }
 }
+
+// MARK: - Previews
+
+#if DEBUG
+    #Preview("Menu Bar - Bee List") {
+        MenuBarView(
+            hive: .preview(),
+            scheduler: .preview(),
+            isPaused: .constant(false)
+        )
+    }
+
+    #Preview("Menu Bar - Paused") {
+        MenuBarView(
+            hive: .preview(),
+            scheduler: .preview(),
+            isPaused: .constant(true)
+        )
+    }
+
+    #Preview("Menu Bar - Empty") {
+        MenuBarView(
+            hive: .preview(bees: []),
+            scheduler: .preview(),
+            isPaused: .constant(false)
+        )
+    }
+
+    #Preview("Menu Bar - Running") {
+        MenuBarView(
+            hive: .preview(),
+            scheduler: .preview(running: ["journal-bee"]),
+            isPaused: .constant(false)
+        )
+    }
+
+    #Preview("Bee Detail") {
+        BeeDetailView(
+            bee: Bee.previewBees[0],
+            hive: .preview(),
+            scheduler: .preview(),
+            isPaused: false,
+            onBack: {}
+        )
+        .frame(width: 280)
+    }
+
+    #Preview("Bee Detail - Running") {
+        BeeDetailView(
+            bee: Bee.previewBees[0],
+            hive: .preview(),
+            scheduler: .preview(running: ["journal-bee"]),
+            isPaused: false,
+            onBack: {}
+        )
+        .frame(width: 280)
+    }
+
+    #Preview("Bee Row - Enabled") {
+        BeeRow(
+            bee: Bee.previewBees[0],
+            isPaused: false,
+            isRunning: false
+        )
+        .frame(width: 280)
+    }
+
+    #Preview("Bee Row - Running") {
+        BeeRow(
+            bee: Bee.previewBees[0],
+            isPaused: false,
+            isRunning: true
+        )
+        .frame(width: 280)
+    }
+
+    #Preview("Bee Row - Disabled") {
+        BeeRow(
+            bee: Bee.previewBees[1],
+            isPaused: false,
+            isRunning: false
+        )
+        .frame(width: 280)
+    }
+#endif

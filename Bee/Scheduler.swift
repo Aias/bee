@@ -51,18 +51,23 @@ final class Scheduler {
         }
     }
 
-    private func tick(isPaused: @escaping () -> Bool) {
-        guard !isPaused(), let hive else { return }
+    /// Evaluates which bees should trigger at the given time.
+    /// Exposed for testability—allows injecting a specific date instead of using `Date()`.
+    func evaluate(bees: [Bee], isPaused: @escaping () -> Bool, now: Date) {
+        guard !isPaused() else { return }
 
-        let now = Date()
-
-        for bee in hive.bees {
+        for bee in bees {
             guard bee.config.enabled else { continue }
 
             if CronParser.matches(bee.config.schedule, date: now) {
                 handleTrigger(bee)
             }
         }
+    }
+
+    private func tick(isPaused: @escaping () -> Bool) {
+        guard let hive else { return }
+        evaluate(bees: hive.bees, isPaused: isPaused, now: Date())
     }
 
     private func handleTrigger(_ bee: Bee) {
@@ -86,4 +91,14 @@ final class Scheduler {
         }
     }
 
+    // MARK: - Preview Support
+
+    #if DEBUG
+        /// Creates a Scheduler with optional running bees for SwiftUI previews
+        static func preview(running: Set<String> = []) -> Scheduler {
+            let scheduler = Scheduler()
+            scheduler.runningBees = running
+            return scheduler
+        }
+    #endif
 }

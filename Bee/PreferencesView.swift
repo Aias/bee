@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - PreferencesView
+
 struct PreferencesView: View {
     var hive: HiveManager
 
@@ -60,3 +62,11 @@ struct PreferencesView: View {
         .navigationTitle("Bee Preferences")
     }
 }
+
+// MARK: - Previews
+
+#if DEBUG
+    #Preview("Preferences") {
+        PreferencesView(hive: .preview())
+    }
+#endif

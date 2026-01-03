@@ -21,15 +21,27 @@ Bee/
 ├── Scheduler.swift        # Cron evaluation, timer management, overlap handling
 ├── BeeRunner.swift        # Claude CLI subprocess execution, logging
 ├── CronParser.swift       # Cron → English conversion
+├── ConfirmServer.swift    # User confirmation flow via notifications
 └── NotificationManager.swift  # Error notifications via UserNotifications
+
+BeeTests/
+├── TestHelpers.swift      # Shared test factories (makeBee, makeDate)
+├── CronParserTests.swift  # Cron matching and English conversion
+├── SchedulerTests.swift   # Trigger evaluation, overlap modes
+└── HiveManagerTests.swift # Config persistence, bee discovery
 ```
+
+### Testability Seams
+
+- `HiveManager.init(hivePath:fileManager:)` — inject temp directory for isolated tests
+- `Scheduler.evaluate(bees:isPaused:now:)` — inject specific date instead of `Date()`
 
 ## After Code Changes
 
-Run formatting and linting frequently during development:
+Run formatting, linting, and tests:
 
 ```bash
-swiftformat Bee && swiftlint --fix Bee
+swiftformat . && swiftlint --fix && xcodebuild test -scheme Bee -destination 'platform=macOS' -only-testing:BeeTests
 ```
 
 Then rebuild and relaunch the app:
@@ -44,7 +56,13 @@ xcodebuild -scheme Bee -configuration Debug build && pkill -x Bee; open ~/Librar
 # Build
 xcodebuild -scheme Bee -configuration Debug build
 
-# Run
+# Run tests
+xcodebuild test -scheme Bee -destination 'platform=macOS' -only-testing:BeeTests
+
+# Format & lint
+swiftformat . && swiftlint lint
+
+# Run app
 open ~/Library/Developer/Xcode/DerivedData/Bee-*/Build/Products/Debug/Bee.app
 
 # Kill and relaunch

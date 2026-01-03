@@ -31,3 +31,13 @@ targets:
       path: Bee/Bee.entitlements
       properties:
         com.apple.security.app-sandbox: false # Disable sandbox for file access
+  BeeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - BeeTests
+    dependencies:
+      - target: Bee
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true

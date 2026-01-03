@@ -45,16 +45,17 @@ final class HiveManager {
     private(set) var config: HiveConfig = .init()
     private(set) var lastError: String?
 
-    private let fileManager = FileManager.default
-    var hivePath: URL {
-        fileManager.homeDirectoryForCurrentUser.appendingPathComponent(".bee")
-    }
+    private let fileManager: FileManager
+    private let hiveRoot: URL
+    var hivePath: URL { hiveRoot }
 
     private var configPath: URL {
         hivePath.appendingPathComponent("hive.yaml")
     }
 
-    init() {
+    init(hivePath: URL? = nil, fileManager: FileManager = .default) {
+        self.fileManager = fileManager
+        hiveRoot = hivePath ?? fileManager.homeDirectoryForCurrentUser.appendingPathComponent(".bee")
         refresh()
     }
 
@@ -364,4 +365,52 @@ final class HiveManager {
 
         return lines.joined(separator: "\n") + "\n"
     }
+
+    // MARK: - Preview Support
+
+    #if DEBUG
+        /// Creates a HiveManager with mock data for SwiftUI previews
+        static func preview(bees: [Bee] = Bee.previewBees) -> HiveManager {
+            let manager = HiveManager(hivePath: FileManager.default.temporaryDirectory)
+            manager.bees = bees
+            manager.config = HiveConfig()
+            return manager
+        }
+    #endif
 }
+
+// MARK: - Preview Data
+
+#if DEBUG
+    extension Bee {
+        static let previewBees: [Bee] = [
+            Bee(
+                id: "journal-bee",
+                displayName: "Journal",
+                icon: "book.fill",
+                description: "Composes prose poetry journal entries",
+                path: URL(fileURLWithPath: "/Users/preview/.bee/journal-bee"),
+                allowedTools: ["WebSearch", "Write", "Read"],
+                config: BeeConfig(enabled: true, schedule: "0 9 * * *")
+            ),
+            Bee(
+                id: "test-bee",
+                displayName: "Test",
+                icon: "testtube.2",
+                description: "Tests the confirmation flow",
+                path: URL(fileURLWithPath: "/Users/preview/.bee/test-bee"),
+                allowedTools: ["Bash", "Write", "Read"],
+                config: BeeConfig(enabled: false, schedule: "*/5 * * * *", model: "sonnet")
+            ),
+            Bee(
+                id: "backup-bee",
+                displayName: "Backup",
+                icon: "externaldrive.fill",
+                description: "Backs up important files daily",
+                path: URL(fileURLWithPath: "/Users/preview/.bee/backup-bee"),
+                allowedTools: ["Bash", "Read"],
+                config: BeeConfig(enabled: true, schedule: "0 2 * * *")
+            )
+        ]
+    }
+#endif

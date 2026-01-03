@@ -8,27 +8,50 @@
 
 /* Begin PBXBuildFile section */
 		0658366F3E38C33129969796 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6B2F07D688BF18283F6AA1 /* PreferencesView.swift */; };
+		0A1E80DAEF255D7C271FE131 /* HiveManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E7EAE08E5E5ACE47882927 /* HiveManagerTests.swift */; };
 		25938C1B7593892246D0F0C2 /* HiveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9955572BF1488620BBC9E1 /* HiveManager.swift */; };
 		265233796B3E5F2ACFBF7199 /* BeeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1F517A85A10F32B7579853 /* BeeApp.swift */; };
+		2663F3313067803286623A34 /* BeeRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BFE96F717EB603464D7283 /* BeeRunnerTests.swift */; };
+		2A3E0990D05ABE97DBE5490D /* SchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB653279E80BC3611871688 /* SchedulerTests.swift */; };
+		2AA19CC47634501027002462 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B33F89B533D16BE63C878E /* TestHelpers.swift */; };
 		2E6CA933000B9C73C375DC49 /* BeeRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C8EC38B9887A48C8830A9A1 /* BeeRunner.swift */; };
 		3E285B4282E409F81B08C816 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B1656C27F2992D391274ED /* NotificationManager.swift */; };
+		6014A32D8A9292B7E01D0503 /* CronParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137CFAC814F2BBD7B9CA278A /* CronParserTests.swift */; };
 		7CE09FC196E8DA50A7F3C60B /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC189921973D9EE8DD8EA06A /* Scheduler.swift */; };
 		876725A8C352FBD652C3293E /* ConfirmServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128B8B58B1ED5B74478A1B7A /* ConfirmServer.swift */; };
 		96B71B74CD52E055672BEB5D /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91286474DD850C7AD6953513 /* MenuBarView.swift */; };
 		C70DB5E69048E2130C33C2EF /* CronParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669409F384B30B441B9D8CE0 /* CronParser.swift */; };
+		CBC9AEFD41369C3A36B037C0 /* ConfirmServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3289261FE1F06626DF997EF3 /* ConfirmServerTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C2324339C0C67CA5810DBFA6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F5F050BC5B4D1D67B5F3D9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2A2159AF4026CBE49B8B40CB;
+			remoteInfo = Bee;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		128B8B58B1ED5B74478A1B7A /* ConfirmServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmServer.swift; sourceTree = "<group>"; };
+		137CFAC814F2BBD7B9CA278A /* CronParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronParserTests.swift; sourceTree = "<group>"; };
+		28B33F89B533D16BE63C878E /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		3289261FE1F06626DF997EF3 /* ConfirmServerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmServerTests.swift; sourceTree = "<group>"; };
 		32B1656C27F2992D391274ED /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		38BFE96F717EB603464D7283 /* BeeRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeeRunnerTests.swift; sourceTree = "<group>"; };
 		4D1F517A85A10F32B7579853 /* BeeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeeApp.swift; sourceTree = "<group>"; };
+		57CFBAA25DED27D78E28B052 /* BeeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		669409F384B30B441B9D8CE0 /* CronParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronParser.swift; sourceTree = "<group>"; };
 		6C9955572BF1488620BBC9E1 /* HiveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiveManager.swift; sourceTree = "<group>"; };
 		8C8EC38B9887A48C8830A9A1 /* BeeRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeeRunner.swift; sourceTree = "<group>"; };
 		8E6B2F07D688BF18283F6AA1 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		91286474DD850C7AD6953513 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		9DB653279E80BC3611871688 /* SchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulerTests.swift; sourceTree = "<group>"; };
 		A71F9000D2B9DC13ED5FBF02 /* Bee.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Bee.entitlements; sourceTree = "<group>"; };
 		E1C142D3C145A53FE57D2CF2 /* Bee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bee.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6E7EAE08E5E5ACE47882927 /* HiveManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiveManagerTests.swift; sourceTree = "<group>"; };
 		FC189921973D9EE8DD8EA06A /* Scheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,14 +77,29 @@
 			isa = PBXGroup;
 			children = (
 				2F2D7CFEA3D67707B4921133 /* Bee */,
+				C3CC4091040F09916F42D293 /* BeeTests */,
 				F93257EEC47AFFCCF999C132 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		C3CC4091040F09916F42D293 /* BeeTests */ = {
+			isa = PBXGroup;
+			children = (
+				38BFE96F717EB603464D7283 /* BeeRunnerTests.swift */,
+				3289261FE1F06626DF997EF3 /* ConfirmServerTests.swift */,
+				137CFAC814F2BBD7B9CA278A /* CronParserTests.swift */,
+				F6E7EAE08E5E5ACE47882927 /* HiveManagerTests.swift */,
+				9DB653279E80BC3611871688 /* SchedulerTests.swift */,
+				28B33F89B533D16BE63C878E /* TestHelpers.swift */,
+			);
+			path = BeeTests;
 			sourceTree = "<group>";
 		};
 		F93257EEC47AFFCCF999C132 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				E1C142D3C145A53FE57D2CF2 /* Bee.app */,
+				57CFBAA25DED27D78E28B052 /* BeeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -85,6 +123,24 @@
 			productName = Bee;
 			productReference = E1C142D3C145A53FE57D2CF2 /* Bee.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9D2C0B98FED8057AB7F4E5FB /* BeeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D9195DBABC278689DE4F119 /* Build configuration list for PBXNativeTarget "BeeTests" */;
+			buildPhases = (
+				083451636D9BA50945846C2D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AD4106C7FB5DC61B71989BCE /* PBXTargetDependency */,
+			);
+			name = BeeTests;
+			packageProductDependencies = (
+			);
+			productName = BeeTests;
+			productReference = 57CFBAA25DED27D78E28B052 /* BeeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -115,6 +171,7 @@
 			projectRoot = "";
 			targets = (
 				2A2159AF4026CBE49B8B40CB /* Bee */,
+				9D2C0B98FED8057AB7F4E5FB /* BeeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -136,9 +193,47 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		083451636D9BA50945846C2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2663F3313067803286623A34 /* BeeRunnerTests.swift in Sources */,
+				CBC9AEFD41369C3A36B037C0 /* ConfirmServerTests.swift in Sources */,
+				6014A32D8A9292B7E01D0503 /* CronParserTests.swift in Sources */,
+				0A1E80DAEF255D7C271FE131 /* HiveManagerTests.swift in Sources */,
+				2A3E0990D05ABE97DBE5490D /* SchedulerTests.swift in Sources */,
+				2AA19CC47634501027002462 /* TestHelpers.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		AD4106C7FB5DC61B71989BCE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2A2159AF4026CBE49B8B40CB /* Bee */;
+			targetProxy = C2324339C0C67CA5810DBFA6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		01C8871F72F31E9A20B7014A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.bee.BeeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bee.app/Contents/MacOS/Bee";
+			};
+			name = Debug;
+		};
 		1CEA7BDC4BCAD5F51963EDCD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -203,6 +298,23 @@
 				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
+		};
+		599ADA664516C558A61334CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.bee.BeeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bee.app/Contents/MacOS/Bee";
+			};
+			name = Release;
 		};
 		67DEE2384D2B32DFB835462D /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -305,6 +417,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3D9195DBABC278689DE4F119 /* Build configuration list for PBXNativeTarget "BeeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01C8871F72F31E9A20B7014A /* Debug */,
+				599ADA664516C558A61334CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		3D9D178BE422ACB55AB1F852 /* Build configuration list for PBXNativeTarget "Bee" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

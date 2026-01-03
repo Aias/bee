@@ -9,14 +9,14 @@ excluded:
 disabled_rules:
   - trailing_comma
   - opening_brace
-  - identifier_name  # Allow short names like `id`, `url`
+  - identifier_name # Allow short names like `id`, `url`
   - type_body_length
   - file_length
   - function_body_length
-  - large_tuple  # Used for internal return types
-  - function_parameter_count  # Internal APIs, not public
+  - large_tuple # Used for internal return types
+  - function_parameter_count # Internal APIs, not public
   - multiple_closures_with_trailing_closure
-  - force_unwrapping  # Too noisy for known-safe contexts
+  - force_unwrapping # Too noisy for known-safe contexts
 
 # Opt-in rules worth enabling
 opt_in_rules:
